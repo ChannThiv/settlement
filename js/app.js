@@ -40,6 +40,52 @@ function handleFileInput(fileList) {
 }
 
 /**
+ * readFileWithBestEncoding()
+ * Banking/mainframe files are often encoded in Latin-1 (ISO-8859-1), not UTF-8.
+ * This function tries multiple encodings and returns the one that produces
+ * the longest valid lines (best parse result).
+ *
+ * Encoding priority:
+ *   1. iso-8859-1  — most common for legacy banking/VISA/Mastercard files
+ *   2. utf-8       — standard web encoding
+ *   3. windows-1252 — Windows Western European (superset of Latin-1)
+ *   4. tis-620     — Thai encoding (common in Thai banking systems)
+ *
+ * @param {File} file
+ * @returns {Promise<string>} - Best decoded text
+ */
+async function readFileWithBestEncoding(file) {
+  const encodings = ['iso-8859-1', 'utf-8', 'windows-1252', 'tis-620'];
+  const buffer    = await file.arrayBuffer();
+
+  let bestText     = '';
+  let bestMaxLen   = -1;
+  let bestEncoding = 'iso-8859-1';
+
+  for (const encoding of encodings) {
+    try {
+      const decoder = new TextDecoder(encoding, { fatal: false });
+      const text    = decoder.decode(buffer);
+
+      // Score: find the longest line length — more content = better encoding
+      const lines   = text.split(/\r?\n/).filter(l => l.trim().length > 0);
+      const maxLen  = lines.length > 0 ? Math.max(...lines.map(l => l.length)) : 0;
+
+      if (maxLen > bestMaxLen) {
+        bestMaxLen   = maxLen;
+        bestText     = text;
+        bestEncoding = encoding;
+      }
+    } catch (e) {
+      // Encoding not supported in this browser — skip it
+    }
+  }
+
+  console.log(`[IFD Parser] "${file.name}" → encoding: ${bestEncoding}, max line length: ${bestMaxLen}`);
+  return bestText;
+}
+
+/**
  * processFiles()
  * Reads each File object as text, parses it, stores result in state.
  * Shows loading UI with a progress bar during processing.
@@ -54,19 +100,19 @@ async function processFiles(fileList) {
 
   for (let i = 0; i < fileList.length; i++) {
     const file   = fileList[i];
-    const method = getParsingMethod(file.name);         // from formats.js
-    const text   = await file.text();
-    const parsed = parseFileContent(text, method);      // from formats.js
+    const method = getParsingMethod(file.name);
+    const text   = await readFileWithBestEncoding(file);   // ← smart encoding detection
+    const parsed = parseFileContent(text, method);
 
     results.push({
-      name  : file.name,
-      size  : file.size,
-      method: method,
+      name    : file.name,
+      size    : file.size,
+      method  : method,
       ...parsed   // spreads: headers, rows, label, color, panCol
     });
 
     updateProgress(Math.round(((i + 1) / fileList.length) * 100));
-    await sleep(30); // small delay so progress bar is visible
+    await sleep(30);
   }
 
   // Merge new files into state and activate the last one
