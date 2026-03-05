@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>IFD File Parser System</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet"/>
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="./css/style.css"/>
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════
+       HEADER
+  ═══════════════════════════════════════════════ -->
+  <div id="header">
+    <div id="header-left">
+      <div id="logo">IFD</div>
+      <div>
+        <div id="app-title">FILE PARSER SYSTEM</div>
+        <div id="app-sub">INTERBANK FILE DISPATCHER · FIXED-WIDTH PARSER</div>
+      </div>
+    </div>
+    <div id="header-right">
+      <div class="badge" id="badge-files">— FILES LOADED</div>
+      <div class="badge" id="badge-status">
+        <span class="pulse-dot"></span> SYSTEM READY
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       MAIN LAYOUT
+  ═══════════════════════════════════════════════ -->
+  <div id="layout">
+
+    <!-- SIDEBAR -->
+    <div id="sidebar">
+      <div id="sidebar-title">FORMAT LEGEND</div>
+      <div id="format-legend">
+        <!-- Populated by app.js → renderLegend() -->
+      </div>
+      <div id="sidebar-bottom">
+        <button class="btn" id="btn-upload" onclick="document.getElementById('file-input').click()">
+          ＋ UPLOAD FILES
+        </button>
+        <button class="btn" id="btn-clear" onclick="clearAll()">
+          ✕ CLEAR ALL
+        </button>
+      </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main">
+
+      <!-- ── DROP ZONE (shown when no files loaded) ── -->
+      <div id="dropzone-wrap">
+        <div id="dropzone"
+          ondragover="onDragOver(event)"
+          ondragleave="onDragLeave(event)"
+          ondrop="onDrop(event)"
+          onclick="document.getElementById('file-input').click()"
+        >
+          <!-- Loading state -->
+          <div id="loading-wrap">
+            <div id="spinner"></div>
+            <div id="loading-text">PROCESSING FILES... 0%</div>
+            <div id="progress-bar-wrap">
+              <div id="progress-bar"></div>
+            </div>
+          </div>
+
+          <!-- Default state -->
+          <div id="dz-content">
+            <div id="dz-icon">⬆</div>
+            <div id="dz-title">DROP FILES HERE</div>
+            <div id="dz-sub">
+              Drag &amp; drop IFD / IFO format files or click to browse<br>
+              Format auto-detected from filename · Multiple files supported
+            </div>
+            <div id="dz-tags">
+              <span class="dz-tag">IFO*BIN</span>
+              <span class="dz-tag">IFD*.COM</span>
+              <span class="dz-tag">IFD*.OMN</span>
+              <span class="dz-tag">IFD*.DTL</span>
+              <span class="dz-tag">IFD*.ERR</span>
+              <span class="dz-tag">IFD*.RRN</span>
+              <span class="dz-tag">IFR*</span>
+              <span class="dz-tag">Any</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── FILE VIEW (shown when files are loaded) ── -->
+      <div id="file-view">
+
+        <!-- File Tabs -->
+        <div id="tabs-bar">
+          <!-- Populated by app.js → renderTabs() -->
+          <div id="tab-add-wrap">
+            <button id="tab-add-btn" onclick="document.getElementById('file-input').click()">
+              ＋ ADD
+            </button>
+          </div>
+        </div>
+
+        <!-- Toolbar -->
+        <div id="toolbar">
+          <div id="search-wrap">
+            <span id="search-icon">⌕</span>
+            <input
+              type="text"
+              id="search-input"
+              placeholder="Search all columns..."
+              oninput="onSearch(this.value)"
+            />
+            <span id="search-clear" onclick="clearSearch()">✕</span>
+          </div>
+          <div id="format-badge" class="badge">—</div>
+          <div id="stats">
+            <span><span class="stat-label">ROWS </span><span class="stat-val" id="stat-rows">0</span></span>
+            <span><span class="stat-label">COLS </span><span class="stat-val" id="stat-cols">0</span></span>
+            <span><span class="stat-label">SIZE </span><span class="stat-val" id="stat-size">—</span></span>
+            <span id="filter-note"></span>
+          </div>
+          <button id="btn-export" onclick="exportCSV()">↓ EXPORT CSV</button>
+        </div>
+
+        <!-- Data Table -->
+        <div id="table-wrap">
+          <table id="data-table">
+            <thead id="table-head"></thead>
+            <tbody id="table-body"></tbody>
+          </table>
+        </div>
+
+        <!-- Status Bar -->
+        <div id="status-bar">
+          <span id="status-left">IFD PARSER · PAN MASKING ACTIVE · 🔒 CARD DATA PROTECTED</span>
+          <div id="status-files"></div>
+          <span id="status-right">CLICK ANY CELL TO COPY</span>
+        </div>
+
+      </div><!-- /file-view -->
+    </div><!-- /main -->
+  </div><!-- /layout -->
+
+  <!-- Hidden file input -->
+  <input type="file" id="file-input" multiple style="display:none"
+    onchange="handleFileInput(this.files)"/>
+
+  <!-- Copy toast notification -->
+  <div id="toast">Copied!</div>
+
+  <!-- ═══════════════════════════════════════════════
+       SCRIPTS (formats first, then app logic)
+  ═══════════════════════════════════════════════ -->
+  <script src="./js/formats.js"></script>
+  <script src="./js/app.js"></script>
+
+</body>
+</html>
