@@ -361,7 +361,7 @@ const FORMATS = {
 
 
 /* ─── MAIN PARSER DISPATCHER ────────────────────────────────────────────────
-   Called once per file after it's been read as text.
+   Called once per file after it has been read as text.
    Routes to correct parsing strategy based on format method.
 
    @param {string} text   - Full file contents as plain text string
@@ -369,11 +369,12 @@ const FORMATS = {
    @returns {{ headers, rows, label, color, panCol }}
 ─────────────────────────────────────────────────────────────────────────── */
 function parseFileContent(text, method) {
-  const cfg = FORMATS[method] || FORMATS.RawText;
-  const lines = text.split(/\r?\n/);
-  const rows = [];
+  const cfg   = FORMATS[method] || FORMATS.RawText;
+  // Split on CR+LF, LF only, or CR only — handles all line ending styles
+  const lines = text.split(/\r\n|\r|\n/);
+  const rows  = [];
 
-  // ── RawText: clean and return each line as single-column row
+  // ── RawText: clean and return each line as single-column row ──────────────
   if (method === 'RawText') {
     for (const line of lines) {
       const clean = cleanRawText(line);
@@ -382,36 +383,59 @@ function parseFileContent(text, method) {
     return { headers: cfg.headers, rows, label: cfg.label, color: cfg.color, panCol: -1 };
   }
 
-  // ── Fixed-width with custom parse() function (Format 1 & 4)
+  // ── Fixed-width with custom parse() function (Format 1 & 4) ──────────────
   if (cfg.parse) {
     for (const line of lines) {
-      if (!line.trim()) continue;
-      const parsed = cfg.parse(line);
-      rows.push(parsed || ['[Line too short]']);
+      const trimmed = line.replace(/[\r\n]/g, '');
+      if (!trimmed.trim()) continue;
+      const parsed = cfg.parse(trimmed);
+      if (parsed) {
+        rows.push(parsed);
+      } else {
+        // Line too short — fill headers with empty, mark first col
+        const partial = cfg.headers.map(() => '');
+        partial[0] = `[Line too short: ${trimmed.length} chars]`;
+        rows.push(partial);
+      }
     }
     return { headers: cfg.headers, rows, label: cfg.label, color: cfg.color, panCol: cfg.panCol };
   }
 
-  // ── Fixed-width with widths array (Format 2, 3, 5, 6)
+  // ── Fixed-width with widths array (Format 2, 3, 5, 6) ────────────────────
   if (cfg.widths) {
     const starts = buildStartPositions(cfg.widths);
-    const minLen  = starts[starts.length - 1] + cfg.widths[cfg.widths.length - 1];
+    const minLen = starts[starts.length - 1] + cfg.widths[cfg.widths.length - 1];
+
+    // Log useful debug info to browser console (press F12 to see)
+    console.log(`[IFD Parser] Format: ${method} | Min line length needed: ${minLen}`);
 
     for (const line of lines) {
-      if (!line.trim()) continue;
-      if (line.length < minLen) {
-        rows.push(['[Line too short]']);
-        continue;
+      const trimmed = line.replace(/[\r\n]/g, '');  // strip stray CR/LF
+      if (!trimmed.trim()) continue;
+
+      if (trimmed.length < minLen) {
+        // Line shorter than expected — parse what we can, empty the rest
+        const partial = cfg.widths.map((w, i) => {
+          const start = starts[i];
+          if (start >= trimmed.length) return '';
+          const val = trimmed.slice(start, start + w).trim();
+          return i === cfg.panCol ? maskPan(val) : val;
+        });
+        if (!partial[0]) partial[0] = `[Short: ${trimmed.length}/${minLen}]`;
+        rows.push(partial);
+      } else {
+        // Normal full-length line
+        const row = cfg.widths.map((w, i) => {
+          const val = trimmed.slice(starts[i], starts[i] + w).trim();
+          return i === cfg.panCol ? maskPan(val) : val;
+        });
+        rows.push(row);
       }
-      const row = cfg.widths.map((w, i) => {
-        const val = line.slice(starts[i], starts[i] + w).trim();
-        return i === cfg.panCol ? maskPan(val) : val;
-      });
-      rows.push(row);
     }
     return { headers: cfg.headers, rows, label: cfg.label, color: cfg.color, panCol: cfg.panCol };
   }
 
-  // Fallback — return empty
+  // Fallback
   return { headers: cfg.headers, rows: [], label: cfg.label, color: cfg.color, panCol: -1 };
 }
+
