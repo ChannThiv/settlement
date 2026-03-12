@@ -4,44 +4,95 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>IFD File Parser System</title>
-
-  <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet"/>
-
-  <!-- Stylesheet -->
   <link rel="stylesheet" href="./css/style.css"/>
-
   <style>
-    /* ── NAV additions (does not override existing style.css) ── */
-    .nav-link {
-      font-size: 10px; letter-spacing: 1px; color: #475569;
-      text-decoration: none; padding: 5px 12px;
-      border: 1px solid #0D1F35; border-radius: 4px;
-      transition: all 0.15s;
+    #sidebar { width: 220px; display: flex; flex-direction: column; overflow: hidden; }
+    #sidebar-scroll { flex: 1; overflow-y: auto; overflow-x: hidden; }
+    #sidebar-session {
+      padding: 12px 16px 10px; border-bottom: 1px solid #0D1F35;
+      display: flex; align-items: center; gap: 8px;
     }
-    .nav-link:hover, .nav-link.active {
-      color: #00E5FF; border-color: #00E5FF44;
-      background: rgba(0,229,255,0.06);
+    #sidebar-avatar {
+      width: 30px; height: 30px;
+      background: linear-gradient(135deg, #00E5FF22, #00E5FF11);
+      border: 1px solid #00E5FF33; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; color: #00E5FF; font-weight: 700; flex-shrink: 0;
     }
-    .btn-logout {
-      font-size: 10px; letter-spacing: 1px; color: #FF4757;
-      background: rgba(255,71,87,0.08);
-      border: 1px solid rgba(255,71,87,0.25); border-radius: 4px;
-      padding: 5px 12px; cursor: pointer;
-      font-family: 'IBM Plex Mono'; transition: all 0.15s;
+    #sidebar-user-name { font-size: 10px; color: #94A3B8; font-weight: 600; line-height: 1.3; }
+    #sidebar-user-role { font-size: 8px; color: #334155; letter-spacing: 1px; }
+
+    .menu-section { border-bottom: 1px solid #0D1F35; }
+    .menu-section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 16px 8px; cursor: pointer; user-select: none;
+      transition: background 0.15s;
     }
-    .btn-logout:hover { background: rgba(255,71,87,0.15); }
-    .session-badge {
-      font-size: 9px; color: #334155; letter-spacing: 1px;
-      padding: 5px 12px; border: 1px solid #0D1F35; border-radius: 4px;
+    .menu-section-header:hover { background: rgba(255,255,255,0.02); }
+    .menu-section-title { font-size: 8px; letter-spacing: 3px; font-weight: 700; }
+    .menu-section-arrow { font-size: 9px; color: #334155; transition: transform 0.2s; }
+    .menu-section.collapsed .menu-section-arrow { transform: rotate(-90deg); }
+    .menu-section.collapsed .menu-section-body { display: none; }
+
+    .section-settlement .menu-section-title { color: #00E5FF99; }
+    .section-users .menu-section-title      { color: #FFD70099; }
+
+    #format-legend { padding: 4px 0 6px; }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 16px; text-decoration: none;
+      color: #475569; font-size: 10px; letter-spacing: 1px;
+      border-left: 2px solid transparent; transition: all 0.15s; cursor: pointer;
     }
+    .nav-item:hover { color: #CBD5E1; background: rgba(255,255,255,0.025); }
+    .nav-item.active-page { color: #00E5FF; border-left-color: #00E5FF; background: rgba(0,229,255,0.04); }
+    .nav-item.users-active { color: #FFD700; border-left-color: #FFD700; background: rgba(255,215,0,0.04); }
+
+    .nav-icon {
+      width: 18px; height: 18px; border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; flex-shrink: 0;
+    }
+    .ni-cyan   { background: rgba(0,229,255,0.12);  color: #00E5FF; }
+    .ni-red    { background: rgba(255,71,87,0.12);  color: #FF4757; }
+    .ni-yellow { background: rgba(255,215,0,0.12);  color: #FFD700; }
+    .ni-green  { background: rgba(105,255,71,0.12); color: #69FF47; }
+    .ni-purple { background: rgba(168,85,247,0.12); color: #A855F7; }
+
+    .nav-label { flex: 1; }
+    .nav-count {
+      font-size: 8px; background: rgba(255,215,0,0.1);
+      color: #FFD700; border: 1px solid rgba(255,215,0,0.2);
+      border-radius: 3px; padding: 1px 5px;
+    }
+
+    .menu-divider { height: 1px; background: #0D1F35; margin: 4px 16px; }
+
+    #sidebar-footer {
+      padding: 12px 14px; border-top: 1px solid #0D1F35; flex-shrink: 0;
+    }
+    #btn-logout-side {
+      width: 100%; background: transparent;
+      border: 1px solid rgba(255,71,87,0.2); border-radius: 6px;
+      padding: 9px 0; font-size: 10px; font-family: 'IBM Plex Mono';
+      letter-spacing: 1px; color: #FF4757; cursor: pointer;
+      transition: all 0.15s; display: flex; align-items: center;
+      justify-content: center; gap: 7px;
+    }
+    #btn-logout-side:hover { background: rgba(255,71,87,0.08); border-color: rgba(255,71,87,0.4); }
+
+    .admin-only { display: none; }
+
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #1E3A5F; border-radius: 3px; }
   </style>
 </head>
 <body>
 
-  <!-- ═══════════════════════════════════════════════
-       HEADER
-  ═══════════════════════════════════════════════ -->
+  <!-- HEADER -->
   <div id="header">
     <div id="header-left">
       <div id="logo">CT</div>
@@ -55,38 +106,99 @@
       <div class="badge" id="badge-status">
         <span class="pulse-dot"></span> SYSTEM READY
       </div>
-      <!-- ── AUTH NAV (injected by auth guard below) ── -->
-      <a href="user-management.html" class="nav-link" id="nav-users" style="display:none">⬤ USERS</a>
-      <div class="session-badge" id="session-badge">—</div>
-      <button class="btn-logout" onclick="Auth.logout()">⏻ LOGOUT</button>
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════════════════
-       MAIN LAYOUT
-  ═══════════════════════════════════════════════ -->
+  <!-- LAYOUT -->
   <div id="layout">
 
-    <!-- SIDEBAR -->
+    <!-- ══════════════ SIDEBAR ══════════════ -->
     <div id="sidebar">
-      <div id="sidebar-title">FORMAT LEGEND</div>
-      <div id="format-legend">
-        <!-- Populated by app.js → renderLegend() -->
+
+      <!-- Session strip -->
+      <div id="sidebar-session">
+        <div id="sidebar-avatar">?</div>
+        <div>
+          <div id="sidebar-user-name">Loading...</div>
+          <div id="sidebar-user-role">—</div>
+        </div>
       </div>
-      <div id="sidebar-bottom">
-        <button class="btn" id="btn-upload" onclick="document.getElementById('file-input').click()">
-          ＋ UPLOAD FILES
-        </button>
-        <button class="btn" id="btn-clear" onclick="clearAll()">
-          ✕ CLEAR ALL
+
+      <div id="sidebar-scroll">
+
+        <!-- ── MENU 1: SETTLEMENT ── -->
+        <div class="menu-section section-settlement" id="section-settlement">
+          <div class="menu-section-header" onclick="toggleSection('section-settlement')">
+            <div class="menu-section-title">◈ SETTLEMENT</div>
+            <div class="menu-section-arrow">▾</div>
+          </div>
+          <div class="menu-section-body">
+
+            <div class="nav-item active-page" onclick="document.getElementById('file-input').click()">
+              <div class="nav-icon ni-cyan">⬆</div>
+              <span class="nav-label">Upload Files</span>
+            </div>
+
+            <div class="nav-item" onclick="clearAll()" id="nav-clear" style="display:none">
+              <div class="nav-icon ni-red">✕</div>
+              <span class="nav-label">Clear All Files</span>
+            </div>
+
+            <div class="menu-divider"></div>
+
+            <!-- Format legend populated by app.js -->
+            <div id="format-legend"></div>
+
+          </div>
+        </div>
+
+        <!-- ── MENU 2: USER MANAGEMENT (admin only) ── -->
+        <div class="menu-section section-users admin-only" id="section-users">
+          <div class="menu-section-header" onclick="toggleSection('section-users')">
+            <div class="menu-section-title">◈ USER MANAGEMENT</div>
+            <div class="menu-section-arrow">▾</div>
+          </div>
+          <div class="menu-section-body">
+
+            <a href="user-management.html" class="nav-item">
+              <div class="nav-icon ni-yellow">⊞</div>
+              <span class="nav-label">All Users</span>
+              <span class="nav-count" id="nav-user-count">0</span>
+            </a>
+
+            <a href="user-management.html" class="nav-item">
+              <div class="nav-icon ni-green">＋</div>
+              <span class="nav-label">Create New User</span>
+            </a>
+
+            <div class="menu-divider"></div>
+
+            <div style="padding:6px 16px 10px">
+              <div style="font-size:8px;color:#1E3A5F;letter-spacing:1.5px;margin-bottom:5px">CURRENT SESSION</div>
+              <div id="nav-online" style="font-size:10px;color:#334155;display:flex;align-items:center;gap:6px">
+                <div style="width:5px;height:5px;border-radius:50%;background:#69FF47;flex-shrink:0"></div>
+                <span>—</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div><!-- /sidebar-scroll -->
+
+      <!-- Logout at bottom -->
+      <div id="sidebar-footer">
+        <button id="btn-logout-side" onclick="Auth.logout()">
+          <span>⏻</span> SIGN OUT
         </button>
       </div>
-    </div>
+
+    </div><!-- /sidebar -->
 
     <!-- MAIN CONTENT -->
     <div id="main">
 
-      <!-- ── DROP ZONE (shown when no files loaded) ── -->
+      <!-- Drop Zone -->
       <div id="dropzone-wrap">
         <div id="dropzone"
           ondragover="onDragOver(event)"
@@ -94,16 +206,11 @@
           ondrop="onDrop(event)"
           onclick="document.getElementById('file-input').click()"
         >
-          <!-- Loading state -->
           <div id="loading-wrap">
             <div id="spinner"></div>
             <div id="loading-text">PROCESSING FILES... 0%</div>
-            <div id="progress-bar-wrap">
-              <div id="progress-bar"></div>
-            </div>
+            <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
           </div>
-
-          <!-- Default state -->
           <div id="dz-content">
             <div id="dz-icon">⬆</div>
             <div id="dz-title">DROP FILES HERE</div>
@@ -125,29 +232,17 @@
         </div>
       </div>
 
-      <!-- ── FILE VIEW (shown when files are loaded) ── -->
+      <!-- File View -->
       <div id="file-view">
-
-        <!-- File Tabs -->
         <div id="tabs-bar">
-          <!-- Populated by app.js → renderTabs() -->
           <div id="tab-add-wrap">
-            <button id="tab-add-btn" onclick="document.getElementById('file-input').click()">
-              ＋ ADD
-            </button>
+            <button id="tab-add-btn" onclick="document.getElementById('file-input').click()">＋ ADD</button>
           </div>
         </div>
-
-        <!-- Toolbar -->
         <div id="toolbar">
           <div id="search-wrap">
             <span id="search-icon">⌕</span>
-            <input
-              type="text"
-              id="search-input"
-              placeholder="Search all columns..."
-              oninput="onSearch(this.value)"
-            />
+            <input type="text" id="search-input" placeholder="Search all columns..." oninput="onSearch(this.value)"/>
             <span id="search-clear" onclick="clearSearch()">✕</span>
           </div>
           <div id="format-badge" class="badge">—</div>
@@ -159,52 +254,76 @@
           </div>
           <button id="btn-export" onclick="exportCSV()">↓ EXPORT CSV</button>
         </div>
-
-        <!-- Data Table -->
         <div id="table-wrap">
           <table id="data-table">
             <thead id="table-head"></thead>
             <tbody id="table-body"></tbody>
           </table>
         </div>
-
-        <!-- Status Bar -->
         <div id="status-bar">
           <span id="status-left">IFD PARSER · PAN MASKING ACTIVE · 🔒 CARD DATA PROTECTED</span>
           <div id="status-files"></div>
           <span id="status-right">CLICK ANY CELL TO COPY</span>
         </div>
+      </div>
 
-      </div><!-- /file-view -->
     </div><!-- /main -->
   </div><!-- /layout -->
 
-  <!-- Hidden file input -->
-  <input type="file" id="file-input" multiple style="display:none"
-    onchange="handleFileInput(this.files)"/>
-
-  <!-- Copy toast notification -->
+  <input type="file" id="file-input" multiple style="display:none" onchange="handleFileInput(this.files)"/>
   <div id="toast">Copied!</div>
 
-  <!-- ═══════════════════════════════════════════════
-       SCRIPTS — auth first, then formats, then app
-  ═══════════════════════════════════════════════ -->
   <script src="./js/auth.js"></script>
   <script>
-    // ── SESSION GUARD ─────────────────────────────────────────────
+    /* ── AUTH GUARD ─────────────────────────────────── */
     Auth.requireAuth();
     const _session = Auth.getSession();
 
-    // Show session info & admin-only nav
-    document.getElementById('session-badge').textContent =
-      '⬤ ' + _session.fullName.split(' ')[0].toUpperCase() + ' · ' + _session.role.toUpperCase();
+    /* ── SESSION STRIP ──────────────────────────────── */
+    const _initials = _session.fullName.split(' ').map(w => w[0] || '').join('').slice(0,2).toUpperCase();
+    document.getElementById('sidebar-avatar').textContent    = _initials;
+    document.getElementById('sidebar-user-name').textContent = _session.fullName;
+    document.getElementById('sidebar-user-role').textContent = _session.role.toUpperCase();
 
+    /* ── ADMIN-ONLY: show users section ─────────────── */
     if (_session.role === 'admin') {
-      document.getElementById('nav-users').style.display = 'inline';
+      document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
+      const count = Auth.loadUsers().length;
+      const cEl   = document.getElementById('nav-user-count');
+      if (cEl) cEl.textContent = count;
+      const oEl = document.getElementById('nav-online');
+      if (oEl) oEl.querySelector('span').textContent = _session.fullName;
     }
+
+    /* ── SECTION COLLAPSE ───────────────────────────── */
+    function toggleSection(id) {
+      const sec = document.getElementById(id);
+      sec.classList.toggle('collapsed');
+      try { sessionStorage.setItem('sb_' + id, sec.classList.contains('collapsed') ? '1' : '0'); }
+      catch(e) {}
+    }
+
+    // Restore saved collapse states
+    ['section-settlement', 'section-users'].forEach(id => {
+      try {
+        if (sessionStorage.getItem('sb_' + id) === '1') {
+          document.getElementById(id)?.classList.add('collapsed');
+        }
+      } catch(e) {}
+    });
   </script>
   <script src="./js/formats.js"></script>
   <script src="./js/app.js"></script>
+  <script>
+    /* Patch renderAll to sync the "Clear All Files" nav item visibility */
+    const _origRA = renderAll;
+    renderAll = function() {
+      _origRA();
+      const navClear = document.getElementById('nav-clear');
+      if (navClear) navClear.style.display = state.files.length > 0 ? 'flex' : 'none';
+    };
+    renderAll();
+  </script>
 
 </body>
 </html>
