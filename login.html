@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>IFD Parser — Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      background: #070B14;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #CBD5E1;
+      overflow: hidden;
+    }
+
+    /* ── GRID BACKGROUND ─────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── GLOW ORBS ───────────────────────────────── */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(100px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .orb-1 {
+      width: 500px; height: 500px;
+      background: rgba(0,229,255,0.06);
+      top: -150px; left: -150px;
+    }
+    .orb-2 {
+      width: 400px; height: 400px;
+      background: rgba(105,255,71,0.04);
+      bottom: -100px; right: -100px;
+    }
+
+    /* ── PAGE LAYOUT ─────────────────────────────── */
+    .page {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    /* ── BRAND ───────────────────────────────────── */
+    .brand {
+      text-align: center;
+      margin-bottom: 40px;
+      animation: fadeDown 0.5s ease both;
+    }
+    .brand-logo {
+      width: 52px; height: 52px;
+      background: linear-gradient(135deg, #00E5FF, #0099CC);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Bebas Neue';
+      font-size: 20px;
+      color: #070B14;
+      letter-spacing: 1px;
+      margin: 0 auto 16px;
+      box-shadow: 0 0 30px rgba(0,229,255,0.35), 0 0 60px rgba(0,229,255,0.15);
+    }
+    .brand-title {
+      font-family: 'Bebas Neue';
+      font-size: 28px;
+      letter-spacing: 5px;
+      color: #E2E8F0;
+    }
+    .brand-sub {
+      font-size: 9px;
+      color: #334155;
+      letter-spacing: 3px;
+      margin-top: 4px;
+    }
+
+    /* ── CARD ────────────────────────────────────── */
+    .card {
+      background: #080D18;
+      border: 1px solid #0D1F35;
+      border-radius: 12px;
+      padding: 40px 48px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow:
+        0 0 0 1px rgba(0,229,255,0.04),
+        0 24px 64px rgba(0,0,0,0.5);
+      animation: fadeUp 0.5s 0.15s ease both;
+    }
+
+    .card-title {
+      font-size: 13px;
+      letter-spacing: 2px;
+      color: #475569;
+      margin-bottom: 32px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #0D1F35;
+    }
+
+    /* ── FORM ────────────────────────────────────── */
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-label {
+      display: block;
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: #475569;
+      margin-bottom: 8px;
+    }
+    .form-control {
+      width: 100%;
+      background: #0A0F1E;
+      border: 1px solid #1E3A5F;
+      border-radius: 6px;
+      padding: 12px 16px;
+      font-family: 'IBM Plex Mono';
+      font-size: 13px;
+      color: #CBD5E1;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-control:focus {
+      border-color: #00E5FF66;
+      box-shadow: 0 0 0 3px rgba(0,229,255,0.08);
+    }
+    .form-control::placeholder { color: #1E3A5F; }
+
+    .input-wrap {
+      position: relative;
+    }
+    .input-wrap .toggle-pw {
+      position: absolute;
+      right: 14px; top: 50%;
+      transform: translateY(-50%);
+      background: none; border: none;
+      color: #334155; cursor: pointer;
+      font-size: 11px; font-family: 'IBM Plex Mono';
+      letter-spacing: 1px;
+      padding: 2px 6px;
+    }
+    .toggle-pw:hover { color: #00E5FF; }
+
+    /* ── ERROR ALERT ─────────────────────────────── */
+    .alert {
+      border-radius: 6px;
+      padding: 10px 14px;
+      font-size: 11px;
+      margin-bottom: 20px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+    .alert.show { display: flex; }
+    .alert-error {
+      background: rgba(255,71,87,0.1);
+      border: 1px solid rgba(255,71,87,0.3);
+      color: #FF4757;
+    }
+
+    /* ── BUTTON ──────────────────────────────────── */
+    .btn-login {
+      width: 100%;
+      background: #00E5FF;
+      border: none;
+      border-radius: 6px;
+      padding: 13px;
+      font-family: 'Bebas Neue';
+      font-size: 18px;
+      letter-spacing: 3px;
+      color: #070B14;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 8px;
+    }
+    .btn-login:hover {
+      background: #33EEFF;
+      box-shadow: 0 0 20px rgba(0,229,255,0.3);
+      transform: translateY(-1px);
+    }
+    .btn-login:active { transform: translateY(0); }
+    .btn-login:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* ── FOOTER ──────────────────────────────────── */
+    .login-footer {
+      margin-top: 24px;
+      font-size: 9px;
+      color: #1E3A5F;
+      letter-spacing: 1px;
+      text-align: center;
+      animation: fadeUp 0.5s 0.3s ease both;
+    }
+    .login-footer span { color: #334155; }
+
+    /* ── SPINNER inside button ─────────────────────── */
+    .btn-spinner {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border: 2px solid #070B1466;
+      border-top: 2px solid #070B14;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+
+    /* ── ANIMATIONS ──────────────────────────────── */
+    @keyframes fadeDown {
+      from { opacity:0; transform:translateY(-12px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(12px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <div class="page">
+
+    <div class="brand">
+      <div class="brand-logo">CT</div>
+      <div class="brand-title">CHANN THIV SETTLEMENT</div>
+      <div class="brand-sub">INTERBANK FILE DISPATCHER · FIXED-WIDTH PARSER</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">OPERATOR LOGIN</div>
+
+      <div class="alert alert-error" id="alert-error">
+        <span>⚠</span>
+        <span id="alert-msg">Invalid credentials.</span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="inp-username">USERNAME</label>
+        <input
+          class="form-control"
+          type="text"
+          id="inp-username"
+          placeholder="Enter username"
+          autocomplete="username"
+          autocapitalize="none"
+        />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="inp-password">PASSWORD</label>
+        <div class="input-wrap">
+          <input
+            class="form-control"
+            type="password"
+            id="inp-password"
+            placeholder="Enter password"
+            autocomplete="current-password"
+            style="padding-right: 60px;"
+          />
+          <button class="toggle-pw" type="button" onclick="togglePw()">SHOW</button>
+        </div>
+      </div>
+
+      <button class="btn-login" id="btn-login" onclick="doLogin()">
+        SIGN IN
+      </button>
+    </div>
+
+    <div class="login-footer">
+      DEFAULT: <span>admin</span> / <span>Admin@1234</span> &nbsp;·&nbsp;
+      Change password after first login
+    </div>
+
+  </div>
+
+  <script src="./js/auth.js"></script>
+  <script>
+    // If already logged in, skip to main app
+    Auth.seedDefaultAdmin();
+    if (Auth.isLoggedIn()) window.location.href = 'index.html';
+
+    // Enter key submits
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter') doLogin();
+    });
+
+    function togglePw() {
+      const inp = document.getElementById('inp-password');
+      const btn = document.querySelector('.toggle-pw');
+      if (inp.type === 'password') { inp.type = 'text'; btn.textContent = 'HIDE'; }
+      else                         { inp.type = 'password'; btn.textContent = 'SHOW'; }
+    }
+
+    function showError(msg) {
+      const el = document.getElementById('alert-error');
+      document.getElementById('alert-msg').textContent = msg;
+      el.classList.add('show');
+    }
+
+    function hideError() {
+      document.getElementById('alert-error').classList.remove('show');
+    }
+
+    async function doLogin() {
+      hideError();
+      const username = document.getElementById('inp-username').value.trim();
+      const password = document.getElementById('inp-password').value;
+      const btn      = document.getElementById('btn-login');
+
+      if (!username || !password) {
+        showError('Username and password are required.');
+        return;
+      }
+
+      // Show loading state
+      btn.disabled   = true;
+      btn.innerHTML  = '<span class="btn-spinner"></span>AUTHENTICATING...';
+
+      await new Promise(r => setTimeout(r, 600)); // slight UX delay
+
+      const result = Auth.login(username, password);
+      if (result.ok) {
+        btn.innerHTML = '✓ ACCESS GRANTED';
+        btn.style.background = '#69FF47';
+        await new Promise(r => setTimeout(r, 500));
+        window.location.href = 'index.html';
+      } else {
+        btn.disabled  = false;
+        btn.innerHTML = 'SIGN IN';
+        showError(result.error);
+        document.getElementById('inp-password').value = '';
+        document.getElementById('inp-password').focus();
+      }
+    }
+  </script>
+</body>
+</html>
