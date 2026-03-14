@@ -1,384 +1,123 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>IFD File Parser System</title>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="./css/style.css"/>
-  <style>
-
-    /* ══════════════════════════════════════════════════════════════
-       HEADER — collapsible
-    ══════════════════════════════════════════════════════════════ */
-    #header {
-      background: #080D18;
-      border-bottom: 1px solid #0D1F35;
-      height: 58px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 20px 0 24px;
-      flex-shrink: 0;
-      z-index: 30;
-      overflow: hidden;
-      transition: height 0.3s cubic-bezier(0.4,0,0.2,1),
-                  border-color 0.3s,
-                  padding 0.3s;
-    }
-    #header.collapsed {
-      height: 0;
-      border-bottom-color: transparent;
-      padding-top: 0;
-      padding-bottom: 0;
-    }
-
-    /* Thin restore bar that appears when header is hidden */
-    #header-restore {
-      height: 0;
-      overflow: hidden;
-      background: #080D18;
-      border-bottom: 1px solid transparent;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 20px;
-      flex-shrink: 0;
-      z-index: 30;
-      transition: height 0.3s cubic-bezier(0.4,0,0.2,1),
-                  border-color 0.3s;
-      cursor: pointer;
-    }
-    #header-restore.visible {
-      height: 28px;
-      border-bottom-color: #0D1F35;
-    }
-    #header-restore:hover { background: #0A0F1E; }
-    #restore-label {
-      font-size: 8px; color: #1E3A5F; letter-spacing: 3px;
-      display: flex; align-items: center; gap: 8px;
-    }
-    #restore-label span { color: #334155; }
-
-    /* Close button inside header */
-    #btn-header-close {
-      background: none; border: none; cursor: pointer;
-      color: #1E3A5F; font-size: 11px; letter-spacing: 1px;
-      font-family: 'IBM Plex Mono'; padding: 4px 8px;
-      border-radius: 4px; transition: all 0.15s;
-      display: flex; align-items: center; gap: 5px; flex-shrink: 0;
-    }
-    #btn-header-close:hover { color: #475569; background: rgba(255,255,255,0.04); }
-
-    #header-left  { display: flex; align-items: center; gap: 14px; }
-    #header-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-
-    /* ══════════════════════════════════════════════════════════════
-       SIDEBAR — collapsible dropdown menus
-    ══════════════════════════════════════════════════════════════ */
-    #sidebar {
-      width: 230px;
-      background: #080D18;
-      border-right: 1px solid #0D1F35;
-      display: flex;
-      flex-direction: column;
-      flex-shrink: 0;
-      overflow: hidden;
-      transition: width 0.3s cubic-bezier(0.4,0,0.2,1);
-    }
-
-    /* Session strip */
-    #sidebar-session {
-      padding: 12px 16px;
-      border-bottom: 1px solid #0D1F35;
-      display: flex; align-items: center; gap: 10px;
-      flex-shrink: 0;
-    }
-    #sidebar-avatar {
-      width: 32px; height: 32px;
-      background: linear-gradient(135deg,#00E5FF22,#00E5FF0A);
-      border: 1px solid #00E5FF44; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 11px; font-weight: 700; color: #00E5FF; flex-shrink: 0;
-    }
-    #sidebar-user-name { font-size: 10px; color: #94A3B8; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    #sidebar-user-role { font-size: 8px; color: #334155; letter-spacing: 1.5px; margin-top: 1px; }
-
-    /* Scrollable nav area */
-    #sidebar-nav {
-      flex: 1; overflow-y: auto; overflow-x: hidden;
-    }
-    #sidebar-nav::-webkit-scrollbar { width: 2px; }
-    #sidebar-nav::-webkit-scrollbar-thumb { background: #1E3A5F; }
-
-    /* ── DROPDOWN MENU ─────────────────────────────────────────── */
-    .dd-menu { border-bottom: 1px solid #0D1F35; }
-
-    .dd-trigger {
-      display: flex; align-items: center; gap: 10px;
-      padding: 11px 16px; cursor: pointer; user-select: none;
-      transition: background 0.15s;
-      position: relative;
-    }
-    .dd-trigger:hover { background: rgba(255,255,255,0.025); }
-
-    .dd-trigger-icon {
-      width: 20px; height: 20px; border-radius: 5px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 10px; flex-shrink: 0; transition: all 0.2s;
-    }
-    .dd-trigger-label {
-      flex: 1; font-size: 10px; letter-spacing: 1.5px; font-weight: 600;
-    }
-    .dd-trigger-count {
-      font-size: 8px; border-radius: 3px; padding: 1px 6px; letter-spacing: 0.5px;
-    }
-    .dd-arrow {
-      font-size: 8px; color: #334155;
-      transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
-      flex-shrink: 0;
-    }
-
-    /* Settlement accent */
-    .dd-settlement .dd-trigger-icon { background: rgba(0,229,255,0.12); color: #00E5FF; }
-    .dd-settlement .dd-trigger-label { color: #00E5FF99; }
-    .dd-settlement .dd-trigger:hover .dd-trigger-label { color: #00E5FFcc; }
-
-    /* Users accent */
-    .dd-users .dd-trigger-icon { background: rgba(255,215,0,0.12); color: #FFD700; }
-    .dd-users .dd-trigger-label { color: #FFD70099; }
-    .dd-users .dd-trigger:hover .dd-trigger-label { color: #FFD700cc; }
-
-    /* Open state */
-    .dd-menu.open .dd-arrow { transform: rotate(180deg); }
-
-    /* ── DROPDOWN BODY (animated) ──────────────────────────────── */
-    .dd-body {
-      overflow: hidden;
-      max-height: 0;
-      transition: max-height 0.32s cubic-bezier(0.4,0,0.2,1),
-                  opacity 0.25s ease;
-      opacity: 0;
-    }
-    .dd-menu.open .dd-body {
-      max-height: 600px;
-      opacity: 1;
-    }
-
-    /* ── NAV ITEMS inside dropdown ─────────────────────────────── */
-    .nav-item {
-      display: flex; align-items: center; gap: 10px;
-      padding: 7px 16px 7px 20px;
-      text-decoration: none; color: #475569; font-size: 10px;
-      letter-spacing: 0.8px; border-left: 2px solid transparent;
-      transition: all 0.14s; cursor: pointer;
-    }
-    .nav-item:hover { color: #94A3B8; background: rgba(255,255,255,0.02); }
-
-    .nav-item.active-s { color: #00E5FF; border-left-color: #00E5FF44; background: rgba(0,229,255,0.04); }
-    .nav-item.active-u { color: #FFD700; border-left-color: #FFD70044; background: rgba(255,215,0,0.04); }
-
-    .ni { width: 16px; height: 16px; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 9px; flex-shrink: 0; }
-    .ni-c { background: rgba(0,229,255,0.1);  color: #00E5FF66; }
-    .ni-r { background: rgba(255,71,87,0.1);  color: #FF475766; }
-    .ni-y { background: rgba(255,215,0,0.1);  color: #FFD70066; }
-    .ni-g { background: rgba(105,255,71,0.1); color: #69FF4766; }
-
-    .nav-item.active-s .ni-c { color: #00E5FF; }
-    .nav-item.active-u .ni-y { color: #FFD700; }
-
-    .nav-badge { font-size: 8px; background: rgba(255,215,0,0.1); color: #FFD700; border: 1px solid rgba(255,215,0,0.2); border-radius: 3px; padding: 1px 5px; margin-left: auto; }
-
-    .nav-divider { height: 1px; background: #0D1F35; margin: 3px 16px; }
-
-    /* Format legend inside settlement dropdown */
-    #format-legend { padding: 2px 0 6px; }
-    .legend-item { padding: 5px 16px 5px 20px; display: flex; align-items: center; gap: 9px; border-left: 2px solid transparent; transition: all 0.2s; }
-    .legend-dot { width: 6px; height: 6px; border-radius: 50%; background: #1E3A5F; flex-shrink: 0; transition: all 0.3s; }
-    .legend-label { font-size: 9px; color: #334155; font-weight: 400; }
-    .legend-sub { font-size: 7px; color: #1E3A5F; letter-spacing: 1px; }
-
-    /* Sub-section label */
-    .nav-section-label {
-      padding: 8px 20px 3px;
-      font-size: 7px; color: #1E3A5F; letter-spacing: 2px; font-weight: 700;
-    }
-
-    /* Online indicator */
-    .online-row { padding: 5px 20px 8px; display: flex; align-items: center; gap: 6px; font-size: 9px; color: #334155; }
-    .online-dot { width: 5px; height: 5px; border-radius: 50%; background: #69FF47; flex-shrink: 0; animation: pulse 2s infinite; }
-
-    /* ── SIDEBAR FOOTER ────────────────────────────────────────── */
-    #sidebar-footer {
-      padding: 12px 14px; border-top: 1px solid #0D1F35; flex-shrink: 0;
-    }
-    #btn-signout {
-      width: 100%; background: transparent; border: 1px solid rgba(255,71,87,0.2);
-      border-radius: 6px; padding: 9px 0; font-size: 10px; font-family: 'IBM Plex Mono';
-      letter-spacing: 1px; color: #FF4757; cursor: pointer; transition: all 0.15s;
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-    }
-    #btn-signout:hover { background: rgba(255,71,87,0.08); border-color: rgba(255,71,87,0.4); }
-
-    /* hide admin-only items */
-    .admin-only { display: none; }
-
-    /* badges in header */
-    .badge { border-radius: 4px; padding: 4px 12px; font-size: 10px; letter-spacing: 1px; display: flex; align-items: center; gap: 6px; }
-    #badge-files { background: rgba(0,229,255,0.08); border: 1px solid rgba(0,229,255,0.2); color: #00E5FF; display: none; }
-    #badge-status { background: rgba(105,255,71,0.08); border: 1px solid rgba(105,255,71,0.2); color: #69FF47; }
-    .pulse-dot { width: 6px; height: 6px; border-radius: 50%; background: #69FF47; animation: pulse 2s infinite; display: inline-block; }
-
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-  </style>
+  <link rel="stylesheet" href="./css/db.css"/>
 </head>
 <body>
 
-  <!-- ══ HEADER (closeable) ════════════════════════════════════════ -->
+  <!-- ═══════════════════════ HEADER ═══════════════════════════ -->
   <div id="header">
     <div id="header-left">
       <div id="logo">CT</div>
       <div>
         <div id="app-title">CHANN THIV SETTLEMENT</div>
-        <div id="app-sub">INTERBANK FILE DISPATCHER · FIXED-WIDTH PARSER</div>
+        <div id="app-sub">INTERBANK FILE DISPATCHER · FIXED-WIDTH PARSER · SUPABASE CONNECTED</div>
       </div>
     </div>
     <div id="header-right">
+      <div class="badge" id="badge-db">
+        <span id="db-dot" class="db-dot"></span>
+        <span id="db-label">DB OFFLINE</span>
+      </div>
       <div class="badge" id="badge-files">— FILES LOADED</div>
-      <div class="badge" id="badge-status"><span class="pulse-dot"></span> SYSTEM READY</div>
-      <button id="btn-header-close" onclick="toggleHeader()" title="Hide header bar">
-        ▲ HIDE
-      </button>
+      <div class="badge" id="badge-status">
+        <span class="pulse-dot"></span> SYSTEM READY
+      </div>
     </div>
   </div>
 
-  <!-- Thin restore bar (shown when header is collapsed) -->
-  <div id="header-restore" onclick="toggleHeader()">
-    <div id="restore-label">
-      <div id="logo" style="width:18px;height:18px;font-size:8px;border-radius:3px;box-shadow:none;background:linear-gradient(135deg,#00E5FF,#0099CC);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue';color:#070B14;flex-shrink:0;">CT</div>
-      <span>CHANN THIV SETTLEMENT</span>
-    </div>
-    <span style="font-size:8px;color:#334155;letter-spacing:2px;">▼ SHOW HEADER</span>
-  </div>
-
-  <!-- ══ LAYOUT ════════════════════════════════════════════════════ -->
+  <!-- ═══════════════════════ LAYOUT ═══════════════════════════ -->
   <div id="layout">
 
-    <!-- ══ SIDEBAR ═══════════════════════════════════════════════ -->
+    <!-- SIDEBAR -->
     <div id="sidebar">
+      <div id="sidebar-title">FORMAT LEGEND</div>
+      <div id="format-legend"></div>
 
-      <!-- Session strip -->
-      <div id="sidebar-session">
-        <div id="sidebar-avatar">?</div>
-        <div style="overflow:hidden">
-          <div id="sidebar-user-name">—</div>
-          <div id="sidebar-user-role">—</div>
+      <!-- DB History Panel -->
+      <div id="db-history-wrap">
+        <div id="db-history-title">
+          <span>DATABASE HISTORY</span>
+          <button id="btn-refresh-history" onclick="loadDbHistory()" title="Refresh">↻</button>
+        </div>
+        <div id="db-history-list">
+          <div class="db-history-empty">Connect DB to view history</div>
         </div>
       </div>
 
-      <div id="sidebar-nav">
-
-        <!-- ── DROPDOWN 1: SETTLEMENT ────────────────────────── -->
-        <div class="dd-menu dd-settlement open" id="dd-settlement">
-          <div class="dd-trigger" onclick="toggleDD('dd-settlement')">
-            <div class="dd-trigger-icon">◈</div>
-            <div class="dd-trigger-label">SETTLEMENT</div>
-            <div class="dd-arrow">▾</div>
-          </div>
-          <div class="dd-body">
-
-            <div class="nav-item active-s" onclick="document.getElementById('file-input').click()">
-              <div class="ni ni-c">⬆</div> Upload Files
-            </div>
-            <div class="nav-item" id="nav-clear" onclick="clearAll()" style="display:none">
-              <div class="ni ni-r">✕</div> Clear All Files
-            </div>
-
-            <div class="nav-divider"></div>
-            <div class="nav-section-label">FILE FORMATS</div>
-            <div id="format-legend"></div>
-
-          </div>
-        </div>
-
-        <!-- ── DROPDOWN 2: USER MANAGEMENT (admin only) ──────── -->
-        <div class="dd-menu dd-users admin-only" id="dd-users">
-          <div class="dd-trigger" onclick="toggleDD('dd-users')">
-            <div class="dd-trigger-icon">⊞</div>
-            <div class="dd-trigger-label">USERS</div>
-            <div class="dd-trigger-count nav-badge" id="nav-user-count">0</div>
-            <div class="dd-arrow">▾</div>
-          </div>
-          <div class="dd-body">
-
-            <a href="user-management.html" class="nav-item">
-              <div class="ni ni-y">☰</div> All Users
-            </a>
-            <a href="user-management.html" class="nav-item">
-              <div class="ni ni-g">＋</div> Create New User
-            </a>
-
-            <div class="nav-divider"></div>
-            <div class="nav-section-label">SESSION</div>
-            <div class="online-row">
-              <div class="online-dot"></div>
-              <span id="nav-online">—</span>
-            </div>
-
-          </div>
-        </div>
-
-      </div><!-- /sidebar-nav -->
-
-      <div id="sidebar-footer">
-        <button id="btn-signout" onclick="Auth.logout()">
-          <span>⏻</span> SIGN OUT
+      <div id="sidebar-bottom">
+        <button class="btn" id="btn-upload" onclick="document.getElementById('file-input').click()">
+          ＋ UPLOAD FILES
+        </button>
+        <button class="btn btn-db" id="btn-save-db" onclick="saveCurrentFileToDb()" style="display:none">
+          ⬆ SAVE TO DATABASE
+        </button>
+        <button class="btn" id="btn-clear" onclick="clearAll()" style="display:none">
+          ✕ CLEAR ALL
         </button>
       </div>
+    </div>
 
-    </div><!-- /sidebar -->
-
-    <!-- ══ MAIN CONTENT ══════════════════════════════════════════ -->
+    <!-- MAIN CONTENT -->
     <div id="main">
 
-      <!-- Drop Zone -->
+      <!-- DROP ZONE -->
       <div id="dropzone-wrap">
         <div id="dropzone"
           ondragover="onDragOver(event)"
           ondragleave="onDragLeave(event)"
           ondrop="onDrop(event)"
           onclick="document.getElementById('file-input').click()">
-          <div id="loading-wrap">
+
+          <div id="loading-wrap" style="display:none">
             <div id="spinner"></div>
-            <div id="loading-text">PROCESSING FILES... 0%</div>
-            <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+            <div id="loading-text">PROCESSING FILES...</div>
+            <div id="progress-bar-wrap">
+              <div id="progress-bar"></div>
+            </div>
           </div>
+
           <div id="dz-content">
             <div id="dz-icon">⬆</div>
             <div id="dz-title">DROP FILES HERE</div>
-            <div id="dz-sub">Drag &amp; drop IFD / IFO format files or click to browse<br>Format auto-detected from filename · Multiple files supported</div>
+            <div id="dz-sub">
+              Drag &amp; drop IFD / IFO format files or click to browse<br>
+              Format auto-detected · Multiple files supported
+            </div>
             <div id="dz-tags">
-              <span class="dz-tag">IFO*BIN</span><span class="dz-tag">IFD*COM</span>
-              <span class="dz-tag">IFD*.OMN</span><span class="dz-tag">IFD*.DTL</span>
-              <span class="dz-tag">IFD*.ERR</span><span class="dz-tag">IFD*.RRN</span>
-              <span class="dz-tag">IFR*</span><span class="dz-tag">Any</span>
+              <span class="dz-tag" style="color:#00E5FF;border-color:#00E5FF44">IFO*BIN</span>
+              <span class="dz-tag" style="color:#69FF47;border-color:#69FF4744">IFD*.COM</span>
+              <span class="dz-tag" style="color:#FF6B35;border-color:#FF6B3544">IFD*.OMN</span>
+              <span class="dz-tag" style="color:#FFD700;border-color:#FFD70044">IFD*.DTL</span>
+              <span class="dz-tag" style="color:#FF4757;border-color:#FF475744">IFD*.ERR</span>
+              <span class="dz-tag" style="color:#A855F7;border-color:#A855F744">IFD*.RRN</span>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- File View -->
-      <div id="file-view">
+      <!-- FILE VIEW -->
+      <div id="file-view" style="display:none">
+
+        <!-- Tabs -->
         <div id="tabs-bar">
           <div id="tab-add-wrap">
             <button id="tab-add-btn" onclick="document.getElementById('file-input').click()">＋ ADD</button>
           </div>
         </div>
+
+        <!-- Toolbar -->
         <div id="toolbar">
           <div id="search-wrap">
             <span id="search-icon">⌕</span>
-            <input type="text" id="search-input" placeholder="Search all columns..." oninput="onSearch(this.value)"/>
-            <span id="search-clear" onclick="clearSearch()">✕</span>
+            <input id="search-input" type="text" placeholder="Search all columns..."
+              oninput="onSearch(this.value)"/>
+            <span id="search-clear" onclick="clearSearch()" style="display:none">✕</span>
           </div>
           <div id="format-badge" class="badge">—</div>
           <div id="stats">
@@ -387,94 +126,71 @@
             <span><span class="stat-label">SIZE </span><span class="stat-val" id="stat-size">—</span></span>
             <span id="filter-note"></span>
           </div>
+          <!-- DB Save Button in toolbar -->
+          <button id="btn-save-db-toolbar" class="btn-toolbar-db" onclick="saveCurrentFileToDb()" style="display:none">
+            ⬆ SAVE TO DB
+          </button>
           <button id="btn-export" onclick="exportCSV()">↓ EXPORT CSV</button>
         </div>
+
+        <!-- DB Save Progress Bar -->
+        <div id="db-save-bar" style="display:none">
+          <div id="db-save-progress"></div>
+          <span id="db-save-label">Saving to Supabase... 0%</span>
+        </div>
+
+        <!-- Data Table -->
         <div id="table-wrap">
           <table id="data-table">
             <thead id="table-head"></thead>
             <tbody id="table-body"></tbody>
           </table>
         </div>
+
+        <!-- Status Bar -->
         <div id="status-bar">
           <span id="status-left">IFD PARSER · PAN MASKING ACTIVE · 🔒 CARD DATA PROTECTED</span>
           <div id="status-files"></div>
-          <span id="status-right">CLICK ANY CELL TO COPY</span>
+          <span id="status-right">CLICK ANY CELL TO COPY · ⬆ SAVE TO DB TO PERSIST</span>
         </div>
-      </div>
 
+      </div><!-- /file-view -->
     </div><!-- /main -->
   </div><!-- /layout -->
 
-  <input type="file" id="file-input" multiple style="display:none" onchange="handleFileInput(this.files)"/>
+  <!-- DB Config Modal -->
+  <div id="db-modal-overlay" style="display:none" onclick="closeDbModal()">
+    <div id="db-modal" onclick="event.stopPropagation()">
+      <div id="db-modal-title">⚙ SUPABASE CONFIGURATION</div>
+      <div id="db-modal-sub">Update your connection settings in js/db.js</div>
+      <div class="db-modal-field">
+        <label>Project URL</label>
+        <code id="db-modal-url">—</code>
+      </div>
+      <div class="db-modal-field">
+        <label>Status</label>
+        <span id="db-modal-status">—</span>
+      </div>
+      <div class="db-modal-hint">
+        Get your URL and anon key from:<br>
+        Supabase Dashboard → Settings → API
+      </div>
+      <button class="btn" onclick="closeDbModal()">CLOSE</button>
+    </div>
+  </div>
+
+  <!-- Hidden file input -->
+  <input type="file" id="file-input" multiple style="display:none"
+    onchange="handleFileInput(this.files)"/>
+
+  <!-- Toast notification -->
   <div id="toast">Copied!</div>
 
-  <script src="./js/auth.js"></script>
-  <script>
-    /* ── AUTH ─────────────────────────────────────────── */
-    Auth.requireAuth();
-    const _s = Auth.getSession();
-    const _ini = _s.fullName.split(' ').map(w=>w[0]||'').join('').slice(0,2).toUpperCase();
-    document.getElementById('sidebar-avatar').textContent    = _ini;
-    document.getElementById('sidebar-user-name').textContent = _s.fullName;
-    document.getElementById('sidebar-user-role').textContent = _s.role.toUpperCase();
-
-    if (_s.role === 'admin') {
-      document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
-      const uc = document.getElementById('nav-user-count');
-      if (uc) uc.textContent = Auth.loadUsers().length;
-      const on = document.getElementById('nav-online');
-      if (on) on.textContent = _s.fullName;
-    }
-
-    /* ── HEADER TOGGLE ───────────────────────────────── */
-    function toggleHeader() {
-      const h  = document.getElementById('header');
-      const rb = document.getElementById('header-restore');
-      const isCollapsed = h.classList.contains('collapsed');
-      h.classList.toggle('collapsed');
-      rb.classList.toggle('visible', !isCollapsed);
-      try { sessionStorage.setItem('hdr_collapsed', isCollapsed ? '0' : '1'); } catch(e){}
-    }
-    // Restore header state
-    try {
-      if (sessionStorage.getItem('hdr_collapsed') === '1') {
-        document.getElementById('header').classList.add('collapsed');
-        document.getElementById('header-restore').classList.add('visible');
-      }
-    } catch(e){}
-
-    /* ── DROPDOWN TOGGLE ─────────────────────────────── */
-    function toggleDD(id) {
-      const el = document.getElementById(id);
-      el.classList.toggle('open');
-      try { sessionStorage.setItem('dd_'+id, el.classList.contains('open') ? '1' : '0'); } catch(e){}
-    }
-    // Restore dropdown states (settlement open by default)
-    ['dd-settlement','dd-users'].forEach(id => {
-      try {
-        const saved = sessionStorage.getItem('dd_'+id);
-        const el    = document.getElementById(id);
-        if (!el) return;
-        if (saved === null) {
-          // defaults: settlement open, users closed
-          if (id === 'dd-settlement') el.classList.add('open');
-        } else {
-          el.classList.toggle('open', saved === '1');
-        }
-      } catch(e){}
-    });
-  </script>
+  <!-- Scripts — order matters -->
   <script src="./js/formats.js"></script>
+  <script src="./js/db.js"></script>
   <script src="./js/app.js"></script>
-  <script>
-    /* Sync "Clear All Files" nav item visibility */
-    const _origRA = renderAll;
-    renderAll = function() {
-      _origRA();
-      const nc = document.getElementById('nav-clear');
-      if (nc) nc.style.display = state.files.length > 0 ? 'flex' : 'none';
-    };
-    renderAll();
-  </script>
+  <script src="./js/db-ui.js"></script>
+
 </body>
 </html>
