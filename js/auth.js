@@ -1,151 +1,344 @@
 /* ═══════════════════════════════════════════════════════════════════
-   IFD FILE PARSER SYSTEM — AUTH MODULE
+   IFD FILE PARSER SYSTEM — AUTH MODULE (Supabase Edition)
    js/auth.js
 
-   Handles:
-   - Session storage (sessionStorage — clears on tab close)
-   - Login / logout
-   - Route guard (redirect to login if not authenticated)
-   - Default admin seed on first run
+   Replaces the old localStorage-based Auth system.
+   All users are now stored in Supabase:
+     - auth.users_app  → custom user profiles (username, role, status)
+     - Uses Supabase Auth (email/password) for login sessions
+
+   PUBLIC API  (same interface as old auth.js so other pages don't break):
+     Auth.login(username, password)   → { ok, error }
+     Auth.logout()
+     Auth.getSession()                → { id, username, fullName, role } | null
+     Auth.requireAdmin()              → redirects if not admin
+     Auth.requireLogin()              → redirects if not logged in
+
+   USER CRUD (new — for user-management.html):
+     Auth.getUsers()                  → Promise<user[]>
+     Auth.createUser(data)            → Promise<{ ok, error }>
+     Auth.updateUser(id, data)        → Promise<{ ok, error }>
+     Auth.deleteUser(id)              → Promise<{ ok, error }>
+     Auth.setUserActive(id, bool)     → Promise<{ ok, error }>
+     Auth.changePassword(id, newPw)   → Promise<{ ok, error }>
+     Auth.resetPassword(id)           → Promise<{ ok, tempPw }>
 ═══════════════════════════════════════════════════════════════════ */
 
-const AUTH_SESSION_KEY = 'ifd_session';
-const USERS_STORE_KEY  = 'ifd_users';
+/* ─── SUPABASE CONFIG ───────────────────────────────────────────────────────
+   ⚠️  REPLACE WITH YOUR OWN — same values as in db.js
+─────────────────────────────────────────────────────────────────────────── */
+const AUTH_SUPABASE_URL      = 'https://YOUR_PROJECT_REF.supabase.co';
+const AUTH_SUPABASE_ANON_KEY = 'YOUR_ANON_PUBLIC_KEY';
 
-/* ─── PASSWORD HASHING ──────────────────────────────────────────────
-   Simple deterministic hash (djb2) — suitable for a local/intranet
-   tool. Replace with bcrypt via Web Crypto API for production use.
-─────────────────────────────────────────────────────────────────── */
-function hashPassword(password) {
-  let hash = 5381;
-  for (let i = 0; i < password.length; i++) {
-    hash = ((hash << 5) + hash) ^ password.charCodeAt(i);
-    hash = hash & 0xFFFFFFFF; // keep 32-bit
-  }
-  return 'h' + Math.abs(hash).toString(16).padStart(8, '0');
+/* ─── SESSION KEY ───────────────────────────────────────────────────────────
+   Session stored in sessionStorage (cleared on browser close).
+   Never stores password — only safe fields.
+─────────────────────────────────────────────────────────────────────────── */
+const SESSION_KEY = 'ifd_auth_session';
+
+/* ─── INTERNAL HTTP HELPER ──────────────────────────────────────────────────
+─────────────────────────────────────────────────────────────────────────── */
+async function _authFetch(path, options = {}) {
+  const res = await fetch(`${AUTH_SUPABASE_URL}${path}`, {
+    ...options,
+    headers: {
+      'Content-Type' : 'application/json',
+      'apikey'       : AUTH_SUPABASE_ANON_KEY,
+      'Authorization': `Bearer ${AUTH_SUPABASE_ANON_KEY}`,
+      'Prefer'       : 'return=representation',
+      ...options.headers
+    }
+  });
+  if (res.status === 204) return null;
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.message || data?.error || `HTTP ${res.status}`);
+  return data;
 }
 
-/* ─── USER STORE ────────────────────────────────────────────────────
-   All users stored in localStorage as JSON array.
-   Schema per user:
-   {
-     id        : string (uuid-like)
-     username  : string (unique, lowercase)
-     fullName  : string
-     role      : 'admin' | 'user'
-     password  : string (hashed)
-     createdAt : ISO date string
-     lastLogin : ISO date string | null
-     active    : boolean
-   }
-─────────────────────────────────────────────────────────────────── */
-function loadUsers() {
-  try {
-    return JSON.parse(localStorage.getItem(USERS_STORE_KEY)) || [];
-  } catch { return []; }
+/* ─── PASSWORD HELPERS ──────────────────────────────────────────────────────
+   Simple SHA-256 hash — enough for this internal tool.
+   For production, use bcrypt on a backend server.
+─────────────────────────────────────────────────────────────────────────── */
+async function _hashPassword(plain) {
+  const buf  = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(plain));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
 }
 
-function saveUsers(users) {
-  localStorage.setItem(USERS_STORE_KEY, JSON.stringify(users));
+function _generateId() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random() * 16 | 0;
+    return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+  });
 }
 
-function generateId() {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+function _generateTempPassword() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789@#!';
+  return Array.from({ length: 12 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
 }
 
-/* Seed default admin on first run */
-function seedDefaultAdmin() {
-  const users = loadUsers();
-  if (users.length === 0) {
-    users.push({
-      id        : generateId(),
-      username  : 'admin',
-      fullName  : 'System Administrator',
-      role      : 'admin',
-      password  : hashPassword('Admin@1234'),
-      createdAt : new Date().toISOString(),
-      lastLogin : null,
-      active    : true
-    });
-    saveUsers(users);
-  }
-}
+/* ═══════════════════════════════════════════════════════════════════
+   AUTH OBJECT — public API
+═══════════════════════════════════════════════════════════════════ */
+const Auth = {
 
-/* ─── SESSION ───────────────────────────────────────────────────────
-   Session is stored in sessionStorage (auto-clears on tab/browser close).
-─────────────────────────────────────────────────────────────────── */
-function getSession() {
-  try {
-    return JSON.parse(sessionStorage.getItem(AUTH_SESSION_KEY));
-  } catch { return null; }
-}
+  /* ─── SESSION ──────────────────────────────────────────────────── */
 
-function setSession(user) {
-  sessionStorage.setItem(AUTH_SESSION_KEY, JSON.stringify({
-    id       : user.id,
-    username : user.username,
-    fullName : user.fullName,
-    role     : user.role,
-    loginAt  : new Date().toISOString()
-  }));
-}
+  getSession() {
+    try {
+      const raw = sessionStorage.getItem(SESSION_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+  },
 
-function clearSession() {
-  sessionStorage.removeItem(AUTH_SESSION_KEY);
-}
+  _saveSession(user) {
+    const session = {
+      id       : user.id,
+      username : user.username,
+      fullName : user.full_name,
+      role     : user.role,
+      email    : user.email || ''
+    };
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    return session;
+  },
 
-function isLoggedIn() {
-  return !!getSession();
-}
+  requireLogin() {
+    if (!this.getSession()) {
+      window.location.href = 'login.html';
+    }
+  },
 
-/* ─── ROUTE GUARD ───────────────────────────────────────────────────
-   Call requireAuth() at the top of any protected page.
-   Call requireAdmin() for admin-only pages.
-─────────────────────────────────────────────────────────────────── */
-function requireAuth() {
-  seedDefaultAdmin();
-  if (!isLoggedIn()) {
+  requireAdmin() {
+    const s = this.getSession();
+    if (!s) { window.location.href = 'login.html'; return; }
+    if (s.role !== 'admin') { window.location.href = 'index.html'; }
+  },
+
+  logout() {
+    sessionStorage.removeItem(SESSION_KEY);
     window.location.href = 'login.html';
-    return false;
+  },
+
+
+  /* ─── LOGIN ────────────────────────────────────────────────────── */
+
+  async login(username, password) {
+    try {
+      const hash  = await _hashPassword(password);
+      const users = await _authFetch(
+        `/rest/v1/app_users?username=eq.${encodeURIComponent(username.toLowerCase().trim())}&is_active=eq.true&select=*`
+      );
+
+      if (!users || users.length === 0) {
+        return { ok: false, error: 'Invalid username or password' };
+      }
+
+      const user = users[0];
+
+      if (user.password_hash !== hash) {
+        return { ok: false, error: 'Invalid username or password' };
+      }
+
+      // Update last login timestamp
+      await _authFetch(`/rest/v1/app_users?id=eq.${user.id}`, {
+        method  : 'PATCH',
+        body    : JSON.stringify({ last_login: new Date().toISOString() }),
+        headers : { 'Prefer': 'return=minimal' }
+      });
+
+      const session = this._saveSession(user);
+      return { ok: true, session };
+
+    } catch (err) {
+      return { ok: false, error: err.message };
+    }
+  },
+
+
+  /* ─── USER CRUD ────────────────────────────────────────────────── */
+
+  /**
+   * getUsers()
+   * Returns all users from app_users table, newest first.
+   */
+  async getUsers() {
+    return _authFetch('/rest/v1/app_users?select=*&order=created_at.desc');
+  },
+
+
+  /**
+   * createUser({ username, fullName, role, password })
+   * Inserts a new user into app_users.
+   */
+  async createUser({ username, fullName, role, password }) {
+    try {
+      // Check username uniqueness
+      const existing = await _authFetch(
+        `/rest/v1/app_users?username=eq.${encodeURIComponent(username.toLowerCase().trim())}&select=id`
+      );
+      if (existing && existing.length > 0) {
+        return { ok: false, error: 'Username already exists' };
+      }
+
+      const hash = await _hashPassword(password);
+
+      await _authFetch('/rest/v1/app_users', {
+        method : 'POST',
+        body   : JSON.stringify({
+          id            : _generateId(),
+          username      : username.toLowerCase().trim(),
+          full_name     : fullName.trim(),
+          role          : role,
+          password_hash : hash,
+          is_active     : true,
+          created_at    : new Date().toISOString()
+        }),
+        headers: { 'Prefer': 'return=minimal' }
+      });
+
+      return { ok: true };
+    } catch (err) {
+      return { ok: false, error: err.message };
+    }
+  },
+
+
+  /**
+   * updateUser(id, { fullName, role })
+   * Updates name and/or role of an existing user.
+   */
+  async updateUser(id, { fullName, role }) {
+    try {
+      const updates = {};
+      if (fullName !== undefined) updates.full_name = fullName.trim();
+      if (role     !== undefined) updates.role      = role;
+      updates.updated_at = new Date().toISOString();
+
+      await _authFetch(`/rest/v1/app_users?id=eq.${id}`, {
+        method  : 'PATCH',
+        body    : JSON.stringify(updates),
+        headers : { 'Prefer': 'return=minimal' }
+      });
+
+      // If updating current session user, refresh session
+      const session = this.getSession();
+      if (session && session.id === id) {
+        session.fullName = updates.full_name || session.fullName;
+        session.role     = updates.role      || session.role;
+        sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
+      }
+
+      return { ok: true };
+    } catch (err) {
+      return { ok: false, error: err.message };
+    }
+  },
+
+
+  /**
+   * deleteUser(id)
+   * Soft deletes by setting is_active=false and marking deleted_at.
+   * Never hard-deletes for audit trail preservation.
+   */
+  async deleteUser(id) {
+    try {
+      await _authFetch(`/rest/v1/app_users?id=eq.${id}`, {
+        method  : 'PATCH',
+        body    : JSON.stringify({
+          is_active  : false,
+          deleted_at : new Date().toISOString()
+        }),
+        headers : { 'Prefer': 'return=minimal' }
+      });
+      return { ok: true };
+    } catch (err) {
+      return { ok: false, error: err.message };
+    }
+  },
+
+
+  /**
+   * setUserActive(id, isActive)
+   * Enable or disable a user account.
+   */
+  async setUserActive(id, isActive) {
+    try {
+      await _authFetch(`/rest/v1/app_users?id=eq.${id}`, {
+        method  : 'PATCH',
+        body    : JSON.stringify({
+          is_active  : isActive,
+          updated_at : new Date().toISOString()
+        }),
+        headers : { 'Prefer': 'return=minimal' }
+      });
+      return { ok: true };
+    } catch (err) {
+      return { ok: false, error: err.message };
+    }
+  },
+
+
+  /**
+   * changePassword(id, newPassword)
+   * Updates a user's password hash.
+   */
+  async changePassword(id, newPassword) {
+    try {
+      if (!newPassword || newPassword.length < 8) {
+        return { ok: false, error: 'Password must be at least 8 characters' };
+      }
+      const hash = await _hashPassword(newPassword);
+      await _authFetch(`/rest/v1/app_users?id=eq.${id}`, {
+        method  : 'PATCH',
+        body    : JSON.stringify({
+          password_hash : hash,
+          updated_at    : new Date().toISOString()
+        }),
+        headers : { 'Prefer': 'return=minimal' }
+      });
+      return { ok: true };
+    } catch (err) {
+      return { ok: false, error: err.message };
+    }
+  },
+
+
+  /**
+   * resetPassword(id)
+   * Generates a temporary password, saves it, and returns it for sharing.
+   */
+  async resetPassword(id) {
+    try {
+      const tempPw = _generateTempPassword();
+      const result = await this.changePassword(id, tempPw);
+      if (!result.ok) return result;
+      return { ok: true, tempPw };
+    } catch (err) {
+      return { ok: false, error: err.message };
+    }
+  },
+
+
+  /* ─── SETUP HELPERS ────────────────────────────────────────────── */
+
+  /**
+   * isConfigured()
+   * Returns true if Supabase credentials have been filled in.
+   */
+  isConfigured() {
+    return (
+      AUTH_SUPABASE_URL      !== 'https://YOUR_PROJECT_REF.supabase.co' &&
+      AUTH_SUPABASE_ANON_KEY !== 'YOUR_ANON_PUBLIC_KEY'
+    );
+  },
+
+  /**
+   * createFirstAdmin({ username, fullName, password })
+   * One-time setup: creates the first admin user.
+   * Call this once from browser console if no users exist yet.
+   */
+  async createFirstAdmin({ username, fullName, password }) {
+    return this.createUser({ username, fullName, role: 'admin', password });
   }
-  return true;
-}
 
-function requireAdmin() {
-  if (!requireAuth()) return false;
-  const session = getSession();
-  if (session.role !== 'admin') {
-    window.location.href = 'index.html';
-    return false;
-  }
-  return true;
-}
-
-/* ─── LOGIN / LOGOUT ────────────────────────────────────────────── */
-function login(username, password) {
-  const users = loadUsers();
-  const user  = users.find(u =>
-    u.username === username.trim().toLowerCase() &&
-    u.password === hashPassword(password) &&
-    u.active   === true
-  );
-  if (!user) return { ok: false, error: 'Invalid username or password.' };
-
-  // Update lastLogin
-  user.lastLogin = new Date().toISOString();
-  saveUsers(users);
-  setSession(user);
-  return { ok: true, user };
-}
-
-function logout() {
-  clearSession();
-  window.location.href = 'login.html';
-}
-
-/* ─── EXPOSE GLOBALLY ──────────────────────────────────────────── */
-window.Auth = {
-  login, logout, requireAuth, requireAdmin,
-  getSession, isLoggedIn,
-  loadUsers, saveUsers, hashPassword, generateId, seedDefaultAdmin
 };
