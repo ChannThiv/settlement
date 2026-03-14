@@ -22,8 +22,8 @@
 /* ─── CONFIGURATION ─────────────────────────────────────────────────────────
    ⚠️  REPLACE THESE TWO VALUES WITH YOUR OWN FROM SUPABASE DASHBOARD
 ─────────────────────────────────────────────────────────────────────────── */
-const SUPABASE_URL      = 'https://YOUR_PROJECT_REF.supabase.co';   // ← change this
-const SUPABASE_ANON_KEY = 'YOUR_ANON_PUBLIC_KEY';                    // ← change this
+const SUPABASE_URL      = 'https://zsmtqxexroyxhgcknnbi.supabase.co';   // ← change this
+const SUPABASE_ANON_KEY = 'sb_publishable_u3k5r8xCtireQeps4DsgRg_JgUg_LTk';                    // ← change this
 
 
 /* ─── INTERNAL HELPERS ──────────────────────────────────────────────────────
