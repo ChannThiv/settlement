@@ -1,0 +1,302 @@
+/* ═══════════════════════════════════════════════════════════════════
+   IFD FILE PARSER SYSTEM — DATABASE UI STYLES
+   css/db.css
+
+   Styles for all database-related UI elements added on top of
+   the existing style.css. Load after style.css in index.html.
+═══════════════════════════════════════════════════════════════════ */
+
+
+/* ─── DB STATUS BADGE ───────────────────────────────────────────── */
+#badge-db {
+  border: 1px solid #1E3A5F;
+  color: #334155;
+  cursor: pointer;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  padding: 4px 10px;
+  transition: all .2s;
+}
+
+#badge-db:hover { border-color: #00E5FF44; color: #00E5FF; }
+
+.db-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.db-dot-online {
+  background: #69FF47;
+  box-shadow: 0 0 6px #69FF47;
+  animation: pulse 2s infinite;
+}
+
+.db-dot-offline {
+  background: #FF4757;
+}
+
+.badge-db-online {
+  border-color: rgba(105,255,71,0.3) !important;
+  color: #69FF47 !important;
+}
+
+.badge-db-offline {
+  border-color: rgba(255,71,87,0.3) !important;
+  color: #FF4757 !important;
+}
+
+
+/* ─── DB HISTORY PANEL (sidebar) ────────────────────────────────── */
+#db-history-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid #0D1F35;
+  min-height: 0;
+  overflow: hidden;
+}
+
+#db-history-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px 8px;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: #334155;
+}
+
+#btn-refresh-history {
+  background: transparent;
+  border: none;
+  color: #334155;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0 4px;
+  transition: color .15s;
+  font-family: inherit;
+}
+
+#btn-refresh-history:hover { color: #00E5FF; }
+
+#db-history-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 0 8px;
+}
+
+.db-history-empty {
+  font-size: 10px;
+  color: #1E3A5F;
+  text-align: center;
+  padding: 20px 12px;
+  letter-spacing: .5px;
+}
+
+.db-history-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 7px 14px;
+  border-bottom: 1px solid #0A0F1E;
+  cursor: default;
+  transition: background .12s;
+}
+
+.db-history-item:hover { background: rgba(255,255,255,0.02); }
+
+.dh-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+.dh-info { flex: 1; min-width: 0; }
+
+.dh-name {
+  font-size: 10px;
+  color: #94A3B8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: .3px;
+}
+
+.dh-meta {
+  font-size: 9px;
+  color: #334155;
+  margin-top: 1px;
+  letter-spacing: .3px;
+}
+
+.dh-date {
+  font-size: 8px;
+  color: #1E3A5F;
+  margin-top: 2px;
+}
+
+.dh-status {
+  font-size: 8px;
+  letter-spacing: 1px;
+  padding: 2px 5px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.dh-status-parsed   { background: rgba(0,229,255,.1);   color: #00E5FF; }
+.dh-status-reconciled { background: rgba(105,255,71,.1); color: #69FF47; }
+.dh-status-error    { background: rgba(255,71,87,.1);   color: #FF4757; }
+
+
+/* ─── SAVE TO DB BUTTON ─────────────────────────────────────────── */
+.btn-db {
+  border-color: rgba(105,255,71,0.3) !important;
+  color: #69FF47 !important;
+}
+
+.btn-db:hover {
+  border-color: #69FF47 !important;
+  background: rgba(105,255,71,0.06) !important;
+}
+
+.btn-db:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+/* Toolbar DB button */
+#btn-save-db-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  background: transparent;
+  border: 1px solid rgba(105,255,71,0.3);
+  color: #69FF47;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+}
+
+#btn-save-db-toolbar:hover {
+  border-color: #69FF47;
+  background: rgba(105,255,71,0.06);
+}
+
+#btn-save-db-toolbar:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+
+/* ─── DB SAVE PROGRESS BAR ──────────────────────────────────────── */
+#db-save-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 16px;
+  background: rgba(105,255,71,0.04);
+  border-bottom: 1px solid rgba(105,255,71,0.15);
+  flex-shrink: 0;
+}
+
+#db-save-progress {
+  height: 2px;
+  background: #69FF47;
+  width: 0;
+  transition: width .3s ease;
+  flex: 1;
+  box-shadow: 0 0 8px #69FF4766;
+}
+
+#db-save-label {
+  font-size: 9px;
+  color: #69FF47;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  min-width: 180px;
+  text-align: right;
+}
+
+
+/* ─── DB CONFIG MODAL ───────────────────────────────────────────── */
+#db-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(7,11,20,0.85);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#db-modal {
+  background: #080D18;
+  border: 1px solid #0D1F35;
+  padding: 28px 32px;
+  width: 420px;
+  max-width: 90vw;
+}
+
+#db-modal-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  letter-spacing: 3px;
+  color: #E2E8F0;
+  margin-bottom: 4px;
+}
+
+#db-modal-sub {
+  font-size: 10px;
+  color: #334155;
+  letter-spacing: 1px;
+  margin-bottom: 20px;
+}
+
+.db-modal-field {
+  margin-bottom: 14px;
+}
+
+.db-modal-field label {
+  display: block;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: #334155;
+  margin-bottom: 5px;
+}
+
+.db-modal-field code {
+  display: block;
+  background: #070B14;
+  border: 1px solid #0D1F35;
+  padding: 7px 10px;
+  font-size: 10px;
+  color: #00E5FF;
+  word-break: break-all;
+}
+
+.db-modal-hint {
+  font-size: 10px;
+  color: #475569;
+  line-height: 1.7;
+  margin: 16px 0 20px;
+  padding: 10px;
+  border: 1px solid #0D1F35;
+  border-left: 2px solid #00E5FF44;
+}
+
+
+/* ─── TOAST VARIANTS ────────────────────────────────────────────── */
+#toast.toast-success { background: #69FF47; color: #070B14; }
+#toast.toast-error   { background: #FF4757; color: #fff; }
+#toast.toast-warn    { background: #FFD700; color: #070B14; }
+#toast.toast-info    { background: #00E5FF; color: #070B14; }
