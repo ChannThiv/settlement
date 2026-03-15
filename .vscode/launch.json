@@ -4,40 +4,9 @@
         {
             "type": "chrome",
             "request": "launch",
-            "name": "Launch Chrome against localhost",
-            "url": "http://localhost:5500",
+            "name": "Debug Settlement App",
+            "url": "http://127.0.0.1:5500/login.html",
             "webRoot": "${workspaceFolder}"
         }
     ]
 }
-```
-
----
-
-## Step 3 — Start Debugging
-
-Press **F5** in VS Code — it will launch Chrome connected to your debugger.
-
-Now you can:
-- Set **breakpoints** by clicking left of any line number in your JS files
-- See **variables** in the left debug panel
-- Use the **Debug Console** at the bottom to run JS commands live
-
----
-
-## Step 4 — Set Breakpoints in auth.js
-
-Since you want to debug the login and user management, open `js/auth.js` and click to set breakpoints on these key lines:
-```
-Line: const hash = await _hash(password);     ← see the password hash
-Line: const users = await _af('/rest/v1/...')  ← see Supabase response
-Line: return { ok: true, session }             ← confirm login success
-```
-
----
-
-## Step 5 — Open login.html Directly
-
-In the browser that opens, navigate to:
-```
-http://localhost:5500/login.html
