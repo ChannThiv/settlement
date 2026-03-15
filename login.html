@@ -64,7 +64,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 <script src="./js/auth.js"></script>
 <script>
 // Redirect if already logged in
-if (Auth.isLoggedIn()) window.location.href = 'system.html';
+if (Auth.isLoggedIn()) window.location.href = './system.html';
 
 // Seed default admin if needed (async, non-blocking)
 (async function() {
