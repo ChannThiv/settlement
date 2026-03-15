@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Chann Thiv Settlement System</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:#070B14;font-family:'IBM Plex Mono',monospace;color:#CBD5E1}
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:#0A0F1E}::-webkit-scrollbar-thumb{background:#1E3A5F;border-radius:2px}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ═══ HEADER ════════════════════════════════════ */
+#header{height:52px;background:#080D18;border-bottom:1px solid #0D1F35;display:flex;align-items:center;padding:0 16px;gap:12px;flex-shrink:0;z-index:50}
+#logo{width:32px;height:32px;background:linear-gradient(135deg,#00E5FF,#0099CC);border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue';font-size:13px;color:#070B14;flex-shrink:0;box-shadow:0 0 14px rgba(0,229,255,.3)}
+#app-title{font-family:'Bebas Neue';font-size:18px;letter-spacing:3px;color:#E2E8F0}
+#app-sub{font-size:8px;color:#1E3A5F;letter-spacing:2px}
+#header-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.hbadge{display:flex;align-items:center;gap:5px;padding:3px 10px;border-radius:3px;font-size:9px;letter-spacing:1px;border:1px solid}
+#badge-user{border-color:rgba(255,215,0,.25);color:#FFD700;background:rgba(255,215,0,.06)}
+#badge-db{border-color:#1E3A5F;color:#334155;cursor:pointer}
+#badge-db.online{border-color:rgba(105,255,71,.3);color:#69FF47;background:rgba(105,255,71,.05)}
+.pdot{width:5px;height:5px;border-radius:50%;background:#69FF47;animation:pulse 2s infinite}
+.btn-logout{background:none;border:1px solid rgba(255,71,87,.25);border-radius:4px;padding:4px 12px;font-size:9px;letter-spacing:1px;color:#FF4757;cursor:pointer;font-family:'IBM Plex Mono';transition:all .15s}
+.btn-logout:hover{background:rgba(255,71,87,.1)}
+
+/* ═══ LAYOUT ════════════════════════════════════ */
+#layout{display:flex;height:calc(100vh - 52px)}
+
+/* ═══ SIDEBAR ═══════════════════════════════════ */
+#sidebar{width:220px;background:#080D18;border-right:1px solid #0D1F35;display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;transition:width .25s}
+#sidebar.collapsed{width:0}
+#sidebar-toggle{position:absolute;top:60px;left:212px;width:18px;height:36px;background:#080D18;border:1px solid #0D1F35;border-left:none;border-radius:0 4px 4px 0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:9px;color:#334155;z-index:40;transition:left .25s}
+#sidebar-toggle:hover{color:#00E5FF}
+
+/* User profile mini card */
+#sb-profile{padding:12px 14px;border-bottom:1px solid #0D1F35;display:flex;align-items:center;gap:9px;flex-shrink:0}
+#sb-avatar{width:30px;height:30px;border-radius:50%;background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#FFD700;flex-shrink:0}
+#sb-name{font-size:10px;color:#94A3B8;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#sb-role{font-size:8px;color:#334155;letter-spacing:1px;margin-top:1px}
+
+/* Nav */
+#sb-nav{flex:1;overflow-y:auto;padding:8px 0}
+.nav-section{padding:10px 14px 3px;font-size:7px;color:#1E3A5F;letter-spacing:2.5px;font-weight:700}
+.nav-divider{height:1px;background:#0D1F35;margin:6px 12px}
+
+/* Dropdown menus */
+.dd{border-bottom:none}
+.dd-hd{display:flex;align-items:center;gap:8px;padding:8px 14px;cursor:pointer;user-select:none;transition:background .12s}
+.dd-hd:hover{background:rgba(255,255,255,.02)}
+.dd-ico{width:18px;height:18px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0}
+.dd-lbl{flex:1;font-size:10px;letter-spacing:1px;font-weight:600}
+.dd-arr{font-size:8px;color:#334155;transition:transform .22s;flex-shrink:0}
+.dd.open .dd-arr{transform:rotate(180deg)}
+.dd-body{overflow:hidden;max-height:0;transition:max-height .28s cubic-bezier(.4,0,.2,1),opacity .2s;opacity:0}
+.dd.open .dd-body{max-height:400px;opacity:1}
+
+/* Nav items */
+.ni{display:flex;align-items:center;gap:8px;padding:7px 14px 7px 18px;cursor:pointer;font-size:10px;letter-spacing:.5px;color:#475569;border-left:2px solid transparent;transition:all .12s;user-select:none}
+.ni:hover{color:#94A3B8;background:rgba(255,255,255,.02)}
+.ni.active{color:var(--c,#00E5FF);border-left-color:var(--c,#00E5FF);background:rgba(0,229,255,.04)}
+.ni-icon{width:16px;height:16px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0}
+
+/* Sidebar colors per section */
+.dd-settle .dd-ico{background:rgba(0,229,255,.1);color:#00E5FF}
+.dd-settle .dd-lbl{color:#00E5FF88}
+.dd-users  .dd-ico{background:rgba(255,215,0,.1);color:#FFD700}
+.dd-users  .dd-lbl{color:#FFD70088}
+.dd-proj   .dd-ico{background:rgba(105,255,71,.1);color:#69FF47}
+.dd-proj   .dd-lbl{color:#69FF4788}
+.dd-admin  .dd-ico{background:rgba(168,85,247,.1);color:#A855F7}
+.dd-admin  .dd-lbl{color:#A855F788}
+
+/* DB status */
+#sb-db{padding:8px 14px;border-top:1px solid #0D1F35;display:flex;align-items:center;gap:7px;font-size:8px;color:#1E3A5F;flex-shrink:0}
+.db-dot-sm{width:5px;height:5px;border-radius:50%;background:#FF4757;flex-shrink:0}
+.db-dot-sm.on{background:#69FF47;box-shadow:0 0 5px #69FF47;animation:pulse 2s infinite}
+
+/* ═══ CONTENT AREA ══════════════════════════════ */
+#content-area{flex:1;display:flex;flex-direction:column;overflow:hidden}
+
+/* ═══ TASKBAR (dynamic tabs) ════════════════════ */
+#taskbar{height:38px;background:#080D18;border-bottom:1px solid #0D1F35;display:flex;align-items:stretch;overflow-x:auto;flex-shrink:0}
+#taskbar::-webkit-scrollbar{height:2px}
+.tb-tab{display:flex;align-items:center;gap:7px;padding:0 14px;border-right:1px solid #0D1F35;cursor:pointer;font-size:10px;letter-spacing:.5px;color:#475569;white-space:nowrap;position:relative;min-width:120px;max-width:180px;transition:background .12s;flex-shrink:0}
+.tb-tab:hover{background:rgba(255,255,255,.02);color:#94A3B8}
+.tb-tab.active{color:#CBD5E1;background:rgba(255,255,255,.03)}
+.tb-tab.active::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--tc,#00E5FF)}
+.tb-tab-icon{font-size:10px;flex-shrink:0}
+.tb-tab-label{flex:1;overflow:hidden;text-overflow:ellipsis}
+.tb-close{width:16px;height:16px;display:flex;align-items:center;justify-content:center;border-radius:3px;font-size:11px;color:#334155;flex-shrink:0;transition:all .12s}
+.tb-close:hover{background:rgba(255,71,87,.2);color:#FF4757}
+#tb-home{color:#00E5FF;min-width:auto;padding:0 14px;gap:6px}
+
+/* ═══ PAGE FRAME ════════════════════════════════ */
+#page-frame{flex:1;overflow:hidden;position:relative}
+.page-panel{position:absolute;inset:0;overflow:auto;display:none;padding:24px 28px;animation:fadeIn .2s ease}
+.page-panel.active{display:block}
+
+/* ═══ DASHBOARD PAGE ════════════════════════════ */
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:24px}
+.dash-card{background:#080D18;border:1px solid #0D1F35;border-radius:8px;padding:18px 20px}
+.dash-card-label{font-size:9px;color:#334155;letter-spacing:2px;margin-bottom:8px}
+.dash-card-val{font-family:'Bebas Neue';font-size:32px;letter-spacing:2px;color:#E2E8F0}
+.dash-card-sub{font-size:9px;color:#475569;margin-top:4px}
+.dash-card.c-cyan{border-top:2px solid #00E5FF}
+.dash-card.c-green{border-top:2px solid #69FF47}
+.dash-card.c-gold{border-top:2px solid #FFD700}
+.dash-card.c-purple{border-top:2px solid #A855F7}
+.dash-recent{background:#080D18;border:1px solid #0D1F35;border-radius:8px;padding:18px 20px}
+.dash-recent-title{font-size:9px;letter-spacing:2px;color:#475569;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #0D1F35}
+
+/* ═══ PAGE HEADERS ══════════════════════════════ */
+.ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-shrink:0}
+.ph-title{font-family:'Bebas Neue';font-size:26px;letter-spacing:4px;color:#E2E8F0}
+.ph-sub{font-size:8px;color:#334155;letter-spacing:2px;margin-top:2px}
+.btn-primary{background:#FFD700;border:none;border-radius:6px;padding:8px 20px;font-family:'Bebas Neue';font-size:15px;letter-spacing:2px;color:#070B14;cursor:pointer;transition:all .2s;white-space:nowrap}
+.btn-primary:hover{background:#FFE033;box-shadow:0 0 14px rgba(255,215,0,.3)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-cyan{background:#00E5FF;color:#070B14}
+.btn-cyan:hover{background:#33EEFF;box-shadow:0 0 14px rgba(0,229,255,.3)}
+
+/* ═══ TOOLBAR ═══════════════════════════════════ */
+.toolbar{display:flex;align-items:center;gap:10px;background:#080D18;border:1px solid #0D1F35;border-radius:8px;padding:10px 14px;margin-bottom:16px;flex-wrap:wrap}
+.sw{display:flex;align-items:center;gap:7px;background:#0A0F1E;border:1px solid #1E3A5F;border-radius:5px;padding:6px 11px;flex:1;min-width:160px;max-width:280px}
+.sw input{background:none;border:none;outline:none;color:#94A3B8;font-size:11px;font-family:'IBM Plex Mono';width:100%}
+.sw input::placeholder{color:#1E3A5F}
+.sw-ico{color:#334155;font-size:12px}
+.fsel{background:#0A0F1E;border:1px solid #1E3A5F;border-radius:5px;padding:6px 11px;color:#94A3B8;font-size:10px;font-family:'IBM Plex Mono';outline:none;cursor:pointer}
+.fsel option{background:#0A0F1E}
+.chip{padding:5px 11px;border-radius:4px;font-size:9px;letter-spacing:1px;border:1px solid #1E3A5F;color:#475569;white-space:nowrap}
+.chip span{color:#94A3B8;font-weight:600}
+.ba{background:none;border-radius:4px;padding:5px 10px;font-size:9px;letter-spacing:1px;cursor:pointer;font-family:'IBM Plex Mono';transition:all .15s;border:1px solid;white-space:nowrap}
+.ba:disabled{opacity:.4;cursor:not-allowed}
+.ba-c{color:#00E5FF;border-color:rgba(0,229,255,.25)}.ba-c:hover:not(:disabled){background:rgba(0,229,255,.1)}
+.ba-y{color:#FFD700;border-color:rgba(255,215,0,.25)}.ba-y:hover:not(:disabled){background:rgba(255,215,0,.1)}
+.ba-r{color:#FF4757;border-color:rgba(255,71,87,.25)}.ba-r:hover:not(:disabled){background:rgba(255,71,87,.1)}
+.ba-p{color:#A855F7;border-color:rgba(168,85,247,.25)}.ba-p:hover:not(:disabled){background:rgba(168,85,247,.1)}
+.ba-o{color:#FF6B35;border-color:rgba(255,107,53,.25)}.ba-o:hover:not(:disabled){background:rgba(255,107,53,.1)}
+.ba-g{color:#69FF47;border-color:rgba(105,255,71,.25)}.ba-g:hover:not(:disabled){background:rgba(105,255,71,.1)}
+
+/* ═══ TABLE ═════════════════════════════════════ */
+.tw{background:#080D18;border:1px solid #0D1F35;border-radius:8px;overflow:auto}
+table{width:100%;border-collapse:collapse;font-size:11px;min-width:700px}
+thead{position:sticky;top:0;z-index:5}
+thead tr{background:#080D18}
+th{padding:10px 14px;text-align:left;font-size:9px;letter-spacing:1.5px;color:#FFD700BB;font-weight:500;border-right:1px solid #0D1F35;white-space:nowrap;border-bottom:1px solid rgba(255,215,0,.1)}
+th:last-child{border-right:none}
+tbody tr{border-bottom:1px solid #0A0F1E;transition:background .1s}
+tbody tr:hover{background:rgba(255,255,255,.015)}
+td{padding:10px 14px;color:#94A3B8;border-right:1px solid #0A0F1E}
+td:last-child{border-right:none}
+.td-bold{color:#CBD5E1;font-weight:500}
+.empty-td td{padding:48px;text-align:center;color:#1E3A5F;font-size:11px;letter-spacing:1px}
+.row-in{animation:fadeIn .18s ease both}
+
+/* Badges */
+.rb{padding:2px 8px;border-radius:3px;font-size:9px;letter-spacing:1px;display:inline-block;white-space:nowrap}
+.rb-admin   {color:#FFD700;background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.25)}
+.rb-operator{color:#00E5FF;background:rgba(0,229,255,.08);border:1px solid rgba(0,229,255,.25)}
+.rb-viewer  {color:#94A3B8;background:rgba(148,163,184,.08);border:1px solid rgba(148,163,184,.25)}
+.rb-auditor {color:#A855F7;background:rgba(168,85,247,.08);border:1px solid rgba(168,85,247,.25)}
+.sb-on{color:#69FF47;display:flex;align-items:center;gap:5px;font-size:9px}
+.sb-off{color:#FF4757;display:flex;align-items:center;gap:5px;font-size:9px}
+.sdot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.self-tag{font-size:8px;color:#334155;border:1px solid #1E3A5F;border-radius:2px;padding:1px 4px;margin-left:4px}
+.acts{display:flex;gap:4px;flex-wrap:nowrap}
+
+/* ═══ MODAL ═════════════════════════════════════ */
+.mbd{position:fixed;inset:0;background:rgba(7,11,20,.88);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:200;opacity:0;pointer-events:none;transition:opacity .2s}
+.mbd.open{opacity:1;pointer-events:all}
+.modal{background:#080D18;border:1px solid #0D1F35;border-radius:12px;padding:28px 32px;width:100%;max-width:480px;box-shadow:0 32px 80px rgba(0,0,0,.6);transform:translateY(14px);transition:transform .2s}
+.mbd.open .modal{transform:translateY(0)}
+.mhd{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;padding-bottom:14px;border-bottom:1px solid #0D1F35}
+.mtitle{font-family:'Bebas Neue';font-size:20px;letter-spacing:3px;color:#E2E8F0}
+.mx{background:none;border:none;color:#334155;font-size:18px;cursor:pointer;padding:2px 6px;transition:color .15s}
+.mx:hover{color:#FF4757}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.fg{margin-bottom:16px}
+.fl{display:block;font-size:9px;letter-spacing:2px;color:#475569;margin-bottom:6px}
+.req{color:#FF4757}
+.fc{width:100%;background:#0A0F1E;border:1px solid #1E3A5F;border-radius:6px;padding:9px 13px;font-family:'IBM Plex Mono';font-size:12px;color:#CBD5E1;outline:none;transition:border-color .2s,box-shadow .2s}
+.fc:focus{border-color:#FFD70055;box-shadow:0 0 0 3px rgba(255,215,0,.07)}
+.fc::placeholder{color:#1E3A5F}
+.fc:read-only{color:#475569;cursor:default}
+select.fc{cursor:pointer}select.fc option{background:#0A0F1E}
+.fh{font-size:9px;color:#1E3A5F;margin-top:4px}
+.fh.err{color:#FF4757}
+.pw-w{position:relative}.pw-w .fc{padding-right:56px}
+.pw-t{position:absolute;right:11px;top:50%;transform:translateY(-50%);background:none;border:none;color:#334155;cursor:pointer;font-size:9px;font-family:'IBM Plex Mono';letter-spacing:1px;transition:color .15s}
+.pw-t:hover{color:#FFD700}
+.pw-bars{display:flex;gap:3px;margin-top:7px}
+.pb{height:3px;flex:1;border-radius:2px;background:#1E3A5F;transition:background .3s}
+.pb.weak{background:#FF4757}.pb.fair{background:#FFD700}.pb.strong{background:#69FF47}
+.mft{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;padding-top:14px;border-top:1px solid #0D1F35}
+.btn-cancel{background:none;border:1px solid #1E3A5F;border-radius:6px;padding:8px 18px;font-family:'IBM Plex Mono';font-size:10px;letter-spacing:1px;color:#475569;cursor:pointer;transition:all .15s}
+.btn-cancel:hover{border-color:#334155;color:#94A3B8}
+.bsub{border:none;border-radius:6px;padding:8px 22px;font-family:'Bebas Neue';font-size:15px;letter-spacing:2px;cursor:pointer;transition:all .2s}
+.bsub:disabled{opacity:.5;cursor:not-allowed}
+.bs-y{background:#FFD700;color:#070B14}.bs-y:hover:not(:disabled){background:#FFE033}
+.bs-c{background:#00E5FF;color:#070B14}.bs-c:hover:not(:disabled){background:#33EEFF}
+.bs-r{background:#FF4757;color:#fff}.bs-r:hover:not(:disabled){background:#FF6070}
+.bs-p{background:#A855F7;color:#fff}.bs-p:hover:not(:disabled){background:#B060FF}
+.bs-g{background:#69FF47;color:#070B14}.bs-g:hover:not(:disabled){background:#7FFF5A}
+.cb{font-size:12px;color:#94A3B8;line-height:1.7}.cb strong{color:#E2E8F0}
+.cw{color:#FF4757;font-size:10px;letter-spacing:1px;margin-top:10px;padding:8px 12px;border:1px solid rgba(255,71,87,.2);border-radius:4px}
+.tmp-pw{background:#0A0F1E;border:1px solid rgba(255,215,0,.3);border-radius:6px;padding:10px 14px;font-size:15px;color:#FFD700;font-weight:700;letter-spacing:2px;flex:1}
+
+/* ═══ LOADING ════════════════════════════════════ */
+.tbl-loading{display:none;position:absolute;inset:0;background:rgba(7,11,20,.7);align-items:center;justify-content:center;font-size:10px;color:#00E5FF;letter-spacing:2px;z-index:10;border-radius:8px}
+.tbl-wrap{position:relative}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(0,229,255,.2);border-top:2px solid #00E5FF;border-radius:50%;animation:spin .8s linear infinite;margin-right:8px}
+
+/* ═══ TOAST ══════════════════════════════════════ */
+#toast{position:fixed;bottom:20px;right:20px;padding:9px 18px;border-radius:6px;font-size:10px;font-weight:600;letter-spacing:1px;transform:translateY(50px);opacity:0;transition:all .22s;z-index:999;pointer-events:none}
+#toast.show{transform:translateY(0);opacity:1}
+#toast.success{background:#69FF47;color:#070B14}
+#toast.error{background:#FF4757;color:#fff}
+#toast.info{background:#00E5FF;color:#070B14}
+#toast.warn{background:#FFD700;color:#070B14}
+
+/* ═══ CHANGE OWN PW PANEL ══════════════════════ */
+.change-pw-card{background:#080D18;border:1px solid #0D1F35;border-radius:8px;padding:24px 28px;max-width:420px}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div id="header">
+  <div id="logo">CT</div>
+  <div><div id="app-title">CHANN THIV SETTLEMENT</div><div id="app-sub">INTERBANK FILE DISPATCHER · SETTLEMENT CONTROL SYSTEM</div></div>
+  <div id="header-right">
+    <div class="hbadge" id="badge-db" onclick="checkDbStatus()"><span class="pdot" id="hdb-dot" style="background:#FF4757"></span><span id="hdb-label">DB OFFLINE</span></div>
+    <div class="hbadge" id="badge-user"><span id="huser-label">—</span></div>
+    <button class="btn-logout" onclick="Auth.logout()">⏻ SIGN OUT</button>
+  </div>
+</div>
+
+<div id="layout">
+
+<!-- SIDEBAR TOGGLE -->
+<div id="sidebar-toggle" onclick="toggleSidebar()">◀</div>
+
+<!-- SIDEBAR -->
+<div id="sidebar">
+  <div id="sb-profile">
+    <div id="sb-avatar">?</div>
+    <div style="overflow:hidden;flex:1"><div id="sb-name">—</div><div id="sb-role">—</div></div>
+  </div>
+
+  <div id="sb-nav">
+
+    <!-- Dashboard -->
+    <div class="nav-section">MAIN</div>
+    <div class="ni" style="--c:#00E5FF" onclick="openTab('dashboard','Dashboard','◈','#00E5FF')">
+      <div class="ni-icon" style="background:rgba(0,229,255,.1);color:#00E5FF">◈</div> Dashboard
+    </div>
+
+    <!-- Settlement -->
+    <div class="nav-divider"></div>
+    <div class="nav-section">SETTLEMENT</div>
+    <div class="dd dd-settle open" id="dd-settle">
+      <div class="dd-hd" onclick="toggleDD('dd-settle')">
+        <div class="dd-ico">⬡</div>
+        <div class="dd-lbl">SETTLEMENT</div>
+        <div class="dd-arr">▾</div>
+      </div>
+      <div class="dd-body">
+        <div class="ni" style="--c:#00E5FF" onclick="openTab('file-parser','File Parser','⬡','#00E5FF')"><div class="ni-icon" style="background:rgba(0,229,255,.08);color:#00E5FF55">⬡</div> File Parser</div>
+        <div class="ni" style="--c:#00E5FF" onclick="openTab('upload-history','Upload History','◷','#00E5FF')"><div class="ni-icon" style="background:rgba(0,229,255,.08);color:#00E5FF55">◷</div> Upload History</div>
+      </div>
+    </div>
+
+    <!-- User Management -->
+    <div class="nav-divider"></div>
+    <div class="nav-section">USER MANAGEMENT</div>
+    <div class="dd dd-users open" id="dd-users">
+      <div class="dd-hd" onclick="toggleDD('dd-users')">
+        <div class="dd-ico">⊞</div>
+        <div class="dd-lbl">USERS</div>
+        <div class="dd-arr">▾</div>
+      </div>
+      <div class="dd-body">
+        <div class="ni" style="--c:#FFD700" id="admin-only-users" onclick="openTab('user-list','User List','☰','#FFD700')"><div class="ni-icon" style="background:rgba(255,215,0,.08);color:#FFD70055">☰</div> User List</div>
+        <div class="ni" style="--c:#FFD700" id="admin-only-roles" onclick="openTab('role-list','Role Management','◉','#FFD700')"><div class="ni-icon" style="background:rgba(255,215,0,.08);color:#FFD70055">◉</div> Role Management</div>
+        <div class="nav-divider" style="margin:3px 8px"></div>
+        <div class="ni" style="--c:#69FF47" onclick="openTab('change-pw','Change Password','🔒','#69FF47')"><div class="ni-icon" style="background:rgba(105,255,71,.08);color:#69FF4755">🔒</div> Change My Password</div>
+      </div>
+    </div>
+
+    <!-- Project Management -->
+    <div class="nav-divider"></div>
+    <div class="nav-section">PROJECT</div>
+    <div class="dd dd-proj" id="dd-proj">
+      <div class="dd-hd" onclick="toggleDD('dd-proj')">
+        <div class="dd-ico">▦</div>
+        <div class="dd-lbl">PROJECT</div>
+        <div class="dd-arr">▾</div>
+      </div>
+      <div class="dd-body">
+        <div class="ni" style="--c:#69FF47" onclick="openTab('projects','Projects','▦','#69FF47')"><div class="ni-icon" style="background:rgba(105,255,71,.08);color:#69FF4755">▦</div> Projects</div>
+        <div class="ni" style="--c:#69FF47" onclick="openTab('tasks','Tasks','✓','#69FF47')"><div class="ni-icon" style="background:rgba(105,255,71,.08);color:#69FF4755">✓</div> Tasks</div>
+      </div>
+    </div>
+
+    <!-- Admin -->
+    <div class="nav-divider"></div>
+    <div class="nav-section">ADMIN</div>
+    <div class="dd dd-admin" id="dd-admin">
+      <div class="dd-hd" onclick="toggleDD('dd-admin')">
+        <div class="dd-ico">⚙</div>
+        <div class="dd-lbl">ADMINISTRATION</div>
+        <div class="dd-arr">▾</div>
+      </div>
+      <div class="dd-body">
+        <div class="ni" style="--c:#A855F7" id="admin-only-logs" onclick="openTab('audit-logs','Audit Logs','◉','#A855F7')"><div class="ni-icon" style="background:rgba(168,85,247,.08);color:#A855F755">◉</div> Activity Logs</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div id="sb-db"><div class="db-dot-sm" id="sb-db-dot"></div><span id="sb-db-label">Checking...</span></div>
+</div>
+
+<!-- CONTENT AREA -->
+<div id="content-area">
+
+  <!-- TASKBAR -->
+  <div id="taskbar">
+    <div class="tb-tab active" id="tb-home" data-page="dashboard" style="--tc:#00E5FF" onclick="switchTab('dashboard')">
+      <span class="tb-tab-icon">◈</span>
+      <span class="tb-tab-label">Dashboard</span>
+    </div>
+  </div>
+
+  <!-- PAGE FRAME -->
+  <div id="page-frame">
+
+    <!-- ══ DASHBOARD ══ -->
+    <div class="page-panel active" id="page-dashboard">
+      <div class="ph"><div><div class="ph-title">DASHBOARD</div><div class="ph-sub">SYSTEM OVERVIEW · CHANN THIV SETTLEMENT</div></div></div>
+      <div class="dash-grid">
+        <div class="dash-card c-cyan"><div class="dash-card-label">TOTAL USERS</div><div class="dash-card-val" id="d-users">—</div><div class="dash-card-sub">Active accounts</div></div>
+        <div class="dash-card c-green"><div class="dash-card-label">FILES PARSED</div><div class="dash-card-val" id="d-files">—</div><div class="dash-card-sub">Settlement files</div></div>
+        <div class="dash-card c-gold"><div class="dash-card-label">TRANSACTIONS</div><div class="dash-card-val" id="d-txns">—</div><div class="dash-card-sub">Records in database</div></div>
+        <div class="dash-card c-purple"><div class="dash-card-label">ROLES</div><div class="dash-card-val" id="d-roles">—</div><div class="dash-card-sub">Access levels</div></div>
+      </div>
+      <div class="dash-recent">
+        <div class="dash-recent-title">QUICK ACTIONS</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn-primary btn-cyan" onclick="openTab('file-parser','File Parser','⬡','#00E5FF')">⬡ FILE PARSER</button>
+          <button class="btn-primary" onclick="openTab('user-list','User List','☰','#FFD700')" id="dash-btn-users">☰ USER LIST</button>
+          <button class="btn-primary" style="background:#A855F7;color:#fff" onclick="openTab('audit-logs','Audit Logs','◉','#A855F7')" id="dash-btn-logs">◉ AUDIT LOGS</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ FILE PARSER ══ -->
+    <div class="page-panel" id="page-file-parser">
+      <div class="ph"><div><div class="ph-title">FILE PARSER</div><div class="ph-sub">IFD/IFO FIXED-WIDTH FORMAT DISPATCHER</div></div></div>
+      <div style="background:#080D18;border:1px solid #0D1F35;border-radius:8px;padding:40px;text-align:center;color:#334155">
+        <div style="font-size:32px;margin-bottom:12px">⬡</div>
+        <div style="font-family:'Bebas Neue';font-size:18px;letter-spacing:3px;color:#475569;margin-bottom:8px">FILE PARSER MODULE</div>
+        <div style="font-size:10px;letter-spacing:1px">The full file parser is in index.html<br>This system.html provides navigation + user management</div>
+        <a href="index.html" style="display:inline-block;margin-top:18px;background:#00E5FF;color:#070B14;padding:9px 22px;border-radius:6px;font-family:'Bebas Neue';font-size:15px;letter-spacing:2px;text-decoration:none">OPEN FILE PARSER →</a>
+      </div>
+    </div>
+
+    <!-- ══ USER LIST ══ -->
+    <div class="page-panel" id="page-user-list">
+      <div class="ph">
+        <div><div class="ph-title">USER LIST</div><div class="ph-sub">CREATE · EDIT · ROLES · DEACTIVATE</div></div>
+        <button class="btn-primary" onclick="openCreateUser()">＋ NEW USER</button>
+      </div>
+      <div class="toolbar">
+        <div class="sw"><span class="sw-ico">⌕</span><input type="text" id="u-search" placeholder="Search users..." oninput="filterUsers()"/></div>
+        <select class="fsel" id="u-filter-role" onchange="filterUsers()">
+          <option value="">ALL ROLES</option>
+          <option value="admin">ADMIN</option>
+          <option value="operator">OPERATOR</option>
+          <option value="viewer">VIEWER</option>
+          <option value="auditor">AUDITOR</option>
+        </select>
+        <select class="fsel" id="u-filter-status" onchange="filterUsers()">
+          <option value="">ALL STATUS</option>
+          <option value="active">ACTIVE</option>
+          <option value="inactive">INACTIVE</option>
+        </select>
+        <button class="ba ba-c" onclick="loadUsers()">↻ REFRESH</button>
+        <div class="chip">TOTAL <span id="u-stat-total">—</span></div>
+        <div class="chip">ACTIVE <span id="u-stat-active">—</span></div>
+        <div class="chip">ADMIN <span id="u-stat-admin">—</span></div>
+      </div>
+      <div class="tbl-wrap tw">
+        <div class="tbl-loading" id="u-loading"><span class="spinner"></span>LOADING FROM DATABASE...</div>
+        <table>
+          <thead><tr>
+            <th>#</th><th>USERNAME</th><th>FULL NAME</th><th>EMAIL</th><th>ROLE</th>
+            <th>STATUS</th><th>CREATED BY</th><th>CREATED DATE</th><th>UPDATED BY</th><th>ACTIONS</th>
+          </tr></thead>
+          <tbody id="u-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ ROLE MANAGEMENT ══ -->
+    <div class="page-panel" id="page-role-list">
+      <div class="ph">
+        <div><div class="ph-title">ROLE MANAGEMENT</div><div class="ph-sub">DEFINE ACCESS LEVELS · RBAC</div></div>
+        <button class="btn-primary" onclick="openCreateRole()">＋ NEW ROLE</button>
+      </div>
+      <div class="toolbar">
+        <div class="sw"><span class="sw-ico">⌕</span><input type="text" id="r-search" placeholder="Search roles..." oninput="filterRoles()"/></div>
+        <button class="ba ba-c" onclick="loadRoles()">↻ REFRESH</button>
+        <div class="chip">TOTAL <span id="r-stat-total">—</span></div>
+      </div>
+      <div class="tbl-wrap tw">
+        <div class="tbl-loading" id="r-loading"><span class="spinner"></span>LOADING...</div>
+        <table>
+          <thead><tr>
+            <th>#</th><th>ROLE NAME</th><th>DESCRIPTION</th><th>CREATED BY</th><th>CREATED DATE</th><th>ACTIONS</th>
+          </tr></thead>
+          <tbody id="r-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ CHANGE OWN PASSWORD ══ -->
+    <div class="page-panel" id="page-change-pw">
+      <div class="ph"><div><div class="ph-title">CHANGE PASSWORD</div><div class="ph-sub">UPDATE YOUR OWN PASSWORD</div></div></div>
+      <div class="change-pw-card">
+        <div class="fg"><label class="fl">CURRENT PASSWORD <span class="req">*</span></label><div class="pw-w"><input class="fc" type="password" id="cpw-current" placeholder="Enter current password"/><button class="pw-t" onclick="tvs('cpw-current',this)">SHOW</button></div><div class="fh err" id="cpw-err-current"></div></div>
+        <div class="fg"><label class="fl">NEW PASSWORD <span class="req">*</span></label><div class="pw-w"><input class="fc" type="password" id="cpw-new" placeholder="Min 8 characters" oninput="cpwStr()"/><button class="pw-t" onclick="tvs('cpw-new',this)">SHOW</button></div><div class="pw-bars"><div class="pb" id="cpb1"></div><div class="pb" id="cpb2"></div><div class="pb" id="cpb3"></div><div class="pb" id="cpb4"></div></div><div class="fh err" id="cpw-err-new"></div></div>
+        <div class="fg"><label class="fl">CONFIRM NEW PASSWORD <span class="req">*</span></label><div class="pw-w"><input class="fc" type="password" id="cpw-confirm" placeholder="Repeat new password"/><button class="pw-t" onclick="tvs('cpw-confirm',this)">SHOW</button></div><div class="fh err" id="cpw-err-confirm"></div></div>
+        <button class="btn-primary bs-g" id="cpw-btn" onclick="submitChangePw()" style="background:#69FF47;color:#070B14;border:none;padding:9px 24px;font-family:'Bebas Neue';font-size:15px;letter-spacing:2px;border-radius:6px;cursor:pointer">CHANGE PASSWORD</button>
+      </div>
+    </div>
+
+    <!-- ══ AUDIT LOGS ══ -->
+    <div class="page-panel" id="page-audit-logs">
+      <div class="ph">
+        <div><div class="ph-title">AUDIT LOGS</div><div class="ph-sub">SYSTEM ACTIVITY · IMMUTABLE RECORD</div></div>
+        <button class="ba ba-c" onclick="loadLogs()">↻ REFRESH</button>
+      </div>
+      <div class="tbl-wrap tw">
+        <table>
+          <thead><tr><th>#</th><th>ACTION</th><th>RESOURCE</th><th>RESULT</th><th>DATE/TIME</th></tr></thead>
+          <tbody id="log-tbody"><tr class="empty-td"><td colspan="5">Load logs to view activity</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ UPLOAD HISTORY ══ -->
+    <div class="page-panel" id="page-upload-history">
+      <div class="ph"><div><div class="ph-title">UPLOAD HISTORY</div><div class="ph-sub">FILES SAVED TO DATABASE</div></div><button class="ba ba-c" onclick="loadFileHistory()">↻ REFRESH</button></div>
+      <div class="tbl-wrap tw">
+        <table>
+          <thead><tr><th>#</th><th>FILENAME</th><th>FORMAT</th><th>ROWS</th><th>SIZE</th><th>DATE</th><th>STATUS</th></tr></thead>
+          <tbody id="fh-tbody"><tr class="empty-td"><td colspan="7">No files saved yet</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ PROJECTS / TASKS PLACEHOLDER ══ -->
+    <div class="page-panel" id="page-projects">
+      <div class="ph"><div><div class="ph-title">PROJECTS</div><div class="ph-sub">PROJECT MANAGEMENT MODULE</div></div></div>
+      <div style="background:#080D18;border:1px solid #0D1F35;border-radius:8px;padding:40px;text-align:center;color:#334155"><div style="font-size:28px;margin-bottom:12px">▦</div><div style="font-family:'Bebas Neue';font-size:16px;letter-spacing:3px;color:#475569">PROJECT MODULE — COMING SOON</div></div>
+    </div>
+    <div class="page-panel" id="page-tasks">
+      <div class="ph"><div><div class="ph-title">TASKS</div><div class="ph-sub">TASK MANAGEMENT MODULE</div></div></div>
+      <div style="background:#080D18;border:1px solid #0D1F35;border-radius:8px;padding:40px;text-align:center;color:#334155"><div style="font-size:28px;margin-bottom:12px">✓</div><div style="font-family:'Bebas Neue';font-size:16px;letter-spacing:3px;color:#475569">TASK MODULE — COMING SOON</div></div>
+    </div>
+
+  </div><!-- /page-frame -->
+</div><!-- /content-area -->
+</div><!-- /layout -->
+
+<!-- ═══════════ MODALS ══════════════ -->
+
+<!-- Create/Edit User -->
+<div class="mbd" id="m-user">
+  <div class="modal">
+    <div class="mhd"><div class="mtitle" id="m-user-title">NEW USER</div><button class="mx" onclick="closeM('m-user')">✕</button></div>
+    <div class="fr">
+      <div class="fg"><label class="fl">USERNAME <span class="req">*</span></label><input class="fc" type="text" id="m-uname" placeholder="e.g. john.doe" autocapitalize="none"/><div class="fh err" id="m-err-uname"></div></div>
+      <div class="fg"><label class="fl">ROLE <span class="req">*</span></label><select class="fc" id="m-role"><option value="viewer">Viewer</option><option value="operator">Operator</option><option value="auditor">Auditor</option><option value="admin">Admin</option></select></div>
+    </div>
+    <div class="fg"><label class="fl">FULL NAME <span class="req">*</span></label><input class="fc" type="text" id="m-fullname" placeholder="First and Last name"/><div class="fh err" id="m-err-fullname"></div></div>
+    <div class="fg"><label class="fl">EMAIL</label><input class="fc" type="email" id="m-email" placeholder="user@email.com"/></div>
+    <div class="fg" id="m-pw-wrap">
+      <label class="fl">PASSWORD <span class="req">*</span></label>
+      <div class="pw-w"><input class="fc" type="password" id="m-pw" placeholder="Min 8 characters" oninput="mPwStr()"/><button class="pw-t" onclick="tvs('m-pw',this)">SHOW</button></div>
+      <div class="pw-bars"><div class="pb" id="mpb1"></div><div class="pb" id="mpb2"></div><div class="pb" id="mpb3"></div><div class="pb" id="mpb4"></div></div>
+      <div class="fh err" id="m-err-pw"></div>
+    </div>
+    <div class="mft"><button class="btn-cancel" onclick="closeM('m-user')">CANCEL</button><button class="bsub bs-y" id="m-user-btn" onclick="submitUser()">CREATE USER</button></div>
+  </div>
+</div>
+
+<!-- Change Password (admin) -->
+<div class="mbd" id="m-pw">
+  <div class="modal">
+    <div class="mhd"><div class="mtitle">CHANGE PASSWORD</div><button class="mx" onclick="closeM('m-pw')">✕</button></div>
+    <div class="fg"><label class="fl">ACCOUNT</label><input class="fc" type="text" id="mpw-user" readonly/></div>
+    <div class="fg"><label class="fl">NEW PASSWORD <span class="req">*</span></label><div class="pw-w"><input class="fc" type="password" id="mpw-new" placeholder="Min 8 characters" oninput="mpwStr()"/><button class="pw-t" onclick="tvs('mpw-new',this)">SHOW</button></div><div class="pw-bars"><div class="pb" id="ppb1"></div><div class="pb" id="ppb2"></div><div class="pb" id="ppb3"></div><div class="pb" id="ppb4"></div></div><div class="fh err" id="mpw-err"></div></div>
+    <div class="fg"><label class="fl">CONFIRM <span class="req">*</span></label><div class="pw-w"><input class="fc" type="password" id="mpw-confirm" placeholder="Repeat password"/><button class="pw-t" onclick="tvs('mpw-confirm',this)">SHOW</button></div><div class="fh err" id="mpw-err2"></div></div>
+    <div class="mft"><button class="btn-cancel" onclick="closeM('m-pw')">CANCEL</button><button class="bsub bs-y" id="mpw-btn" onclick="submitPw()">SAVE PASSWORD</button></div>
+  </div>
+</div>
+
+<!-- Reset Password -->
+<div class="mbd" id="m-reset">
+  <div class="modal">
+    <div class="mhd"><div class="mtitle">RESET PASSWORD</div><button class="mx" onclick="closeM('m-reset')">✕</button></div>
+    <div class="cb">Reset password for <strong id="mreset-name">—</strong>?<br>A temporary password will be generated.</div>
+    <div class="fg" style="margin-top:18px"><label class="fl">TEMPORARY PASSWORD</label><div style="display:flex;gap:8px;align-items:center"><div class="tmp-pw" id="mreset-tmpw">—</div><button class="ba ba-p" onclick="copyTmp()">COPY</button></div><div class="fh">User must change this after first login.</div></div>
+    <div class="mft"><button class="btn-cancel" onclick="closeM('m-reset')">CANCEL</button><button class="bsub bs-p" id="mreset-btn" onclick="confirmReset()">CONFIRM RESET</button></div>
+  </div>
+</div>
+
+<!-- Delete User -->
+<div class="mbd" id="m-del">
+  <div class="modal">
+    <div class="mhd"><div class="mtitle" style="color:#FF4757">DELETE USER</div><button class="mx" onclick="closeM('m-del')">✕</button></div>
+    <div class="cb">Delete <strong id="mdel-name">—</strong>?<div class="cw">⚠ Account will be deactivated. Audit trail preserved.</div></div>
+    <div class="mft"><button class="btn-cancel" onclick="closeM('m-del')">CANCEL</button><button class="bsub bs-r" id="mdel-btn" onclick="confirmDel()">DELETE USER</button></div>
+  </div>
+</div>
+
+<!-- Create/Edit Role -->
+<div class="mbd" id="m-role">
+  <div class="modal">
+    <div class="mhd"><div class="mtitle" id="m-role-title">NEW ROLE</div><button class="mx" onclick="closeM('m-role')">✕</button></div>
+    <div class="fg"><label class="fl">ROLE NAME <span class="req">*</span></label><input class="fc" type="text" id="mr-name" placeholder="e.g. supervisor"/><div class="fh err" id="mr-err-name"></div></div>
+    <div class="fg"><label class="fl">DESCRIPTION</label><input class="fc" type="text" id="mr-desc" placeholder="Describe this role's access level"/></div>
+    <div class="mft"><button class="btn-cancel" onclick="closeM('m-role')">CANCEL</button><button class="bsub bs-y" id="mr-btn" onclick="submitRole()">CREATE ROLE</button></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="./js/auth.js"></script>
+<script>
+/* ═══ GUARDS & INIT ══════════════════════════════ */
+Auth.requireLogin();
+const S = Auth.getSession();
+
+// Init header & sidebar user info
+(function(){
+  document.getElementById('huser-label').textContent = S.username + ' · ' + S.role.toUpperCase();
+  const ini = (S.fullName||'?').split(' ').map(w=>w[0]||'').join('').slice(0,2).toUpperCase();
+  document.getElementById('sb-avatar').textContent = ini;
+  document.getElementById('sb-name').textContent   = S.fullName;
+  document.getElementById('sb-role').textContent   = S.role.toUpperCase();
+
+  // Hide admin-only nav items for non-admins
+  if (S.role !== 'admin') {
+    ['admin-only-users','admin-only-roles','admin-only-logs','dash-btn-users','dash-btn-logs'].forEach(id=>{
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+  }
+  checkDbStatus();
+  loadDashboard();
+})();
+
+/* ═══ DB STATUS ══════════════════════════════════ */
+function checkDbStatus() {
+  const ok = Auth.isConfigured();
+  ['hdb-dot','sb-db-dot'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){el.style.background=ok?'#69FF47':'#FF4757';if(ok)el.classList.add('on');else el.classList.remove('on');}
+  });
+  document.getElementById('hdb-label').textContent = ok?'DB CONNECTED':'DB OFFLINE';
+  document.getElementById('sb-db-label').textContent = ok?'Supabase Connected':'Not Configured';
+  document.getElementById('badge-db').classList.toggle('online',ok);
+}
+
+/* ═══ SIDEBAR TOGGLE ═════════════════════════════ */
+let sidebarOpen = true;
+function toggleSidebar() {
+  sidebarOpen = !sidebarOpen;
+  document.getElementById('sidebar').classList.toggle('collapsed',!sidebarOpen);
+  const btn = document.getElementById('sidebar-toggle');
+  btn.textContent = sidebarOpen ? '◀' : '▶';
+  btn.style.left  = sidebarOpen ? '212px' : '0px';
+}
+
+/* ═══ DROPDOWN TOGGLE ════════════════════════════ */
+function toggleDD(id) {
+  const el = document.getElementById(id);
+  el.classList.toggle('open');
+}
+
+/* ═══ TAB SYSTEM ══════════════════════════════════ */
+const openTabs = new Map(); // pageId → tab element
+let activeTab  = 'dashboard';
+
+function openTab(pageId, label, icon, color) {
+  // Switch if already open
+  if (openTabs.has(pageId)) { switchTab(pageId); return; }
+
+  // Create tab
+  const tab = document.createElement('div');
+  tab.className = 'tb-tab';
+  tab.dataset.page = pageId;
+  tab.style.setProperty('--tc', color);
+  tab.innerHTML = `<span class="tb-tab-icon">${icon}</span><span class="tb-tab-label">${label}</span><span class="tb-close" onclick="closeTab(event,'${pageId}')">×</span>`;
+  tab.addEventListener('click', () => switchTab(pageId));
+  document.getElementById('taskbar').appendChild(tab);
+  openTabs.set(pageId, tab);
+
+  // Load page data
+  switchTab(pageId);
+  loadPageData(pageId);
+}
+
+function switchTab(pageId) {
+  // Deactivate all tabs and panels
+  document.querySelectorAll('.tb-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.page-panel').forEach(p => p.classList.remove('active'));
+
+  // Activate target
+  const tab   = pageId === 'dashboard' ? document.getElementById('tb-home') : openTabs.get(pageId);
+  const panel = document.getElementById('page-' + pageId);
+  if (tab)   tab.classList.add('active');
+  if (panel) panel.classList.add('active');
+
+  // Update sidebar active
+  document.querySelectorAll('.ni').forEach(n => n.classList.remove('active'));
+  activeTab = pageId;
+}
+
+function closeTab(e, pageId) {
+  e.stopPropagation();
+  const tab = openTabs.get(pageId);
+  if (tab) tab.remove();
+  openTabs.delete(pageId);
+
+  // Switch to dashboard if closing active tab
+  if (activeTab === pageId) {
+    document.querySelectorAll('.page-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-dashboard').classList.add('active');
+    document.querySelectorAll('.tb-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tb-home').classList.add('active');
+    activeTab = 'dashboard';
+  }
+}
+
+function loadPageData(pageId) {
+  const loaders = {
+    'user-list'     : loadUsers,
+    'role-list'     : loadRoles,
+    'audit-logs'    : loadLogs,
+    'upload-history': loadFileHistory,
+  };
+  if (loaders[pageId]) loaders[pageId]();
+}
+
+/* ═══ HELPERS ════════════════════════════════════ */
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function fmtDate(iso){ if(!iso)return '—'; const d=new Date(iso); return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})+' '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}); }
+function fmtBytes(b){ if(!b)return '0B'; if(b<1024)return b+'B'; if(b<1048576)return (b/1024).toFixed(1)+'KB'; return (b/1048576).toFixed(1)+'MB'; }
+function tvs(id,btn){ const f=document.getElementById(id); f.type=f.type==='password'?'text':'password'; btn.textContent=f.type==='password'?'SHOW':'HIDE'; }
+function clrErr(...ids){ ids.forEach(id=>{ const e=document.getElementById(id); if(e)e.textContent=''; }); }
+function pwScore(pw){ let s=0; if(pw.length>=8)s++; if(/[A-Z]/.test(pw))s++; if(/[0-9]/.test(pw))s++; if(/[^A-Za-z0-9]/.test(pw))s++; return s; }
+function applyBars(sc,ids){ const lv=['','weak','fair','strong','strong']; ids.forEach((id,i)=>{const el=document.getElementById(id);if(el)el.className='pb '+(i<sc?lv[sc]:'');}); }
+function mPwStr(){ applyBars(pwScore(document.getElementById('m-pw').value),['mpb1','mpb2','mpb3','mpb4']); }
+function mpwStr(){ applyBars(pwScore(document.getElementById('mpw-new').value),['ppb1','ppb2','ppb3','ppb4']); }
+function cpwStr(){ applyBars(pwScore(document.getElementById('cpw-new').value),['cpb1','cpb2','cpb3','cpb4']); }
+function openM(id){ document.getElementById(id).classList.add('open'); }
+function closeM(id){ document.getElementById(id).classList.remove('open'); }
+function setLoading(id,show){ const el=document.getElementById(id); if(el){ el.style.display=show?'flex':'none'; } }
+function setBtnLoading(id,loading,label){ const b=document.getElementById(id); if(!b)return; b.disabled=loading; b.textContent=loading?'⏳ SAVING...':label; }
+let _tt; function toast(msg,type='success'){ const t=document.getElementById('toast'); t.textContent=msg; t.className='show '+type; clearTimeout(_tt); _tt=setTimeout(()=>t.className='',type==='error'?4000:2200); }
+
+function roleBadge(r){ const m={admin:'rb-admin',operator:'rb-operator',viewer:'rb-viewer',auditor:'rb-auditor'}; return `<span class="rb ${m[r]||'rb-viewer'}">${(r||'—').toUpperCase()}</span>`; }
+
+/* ═══ DASHBOARD ══════════════════════════════════ */
+async function loadDashboard() {
+  try {
+    const users = await Auth.getUsers() || [];
+    const roles = await Auth.getRoles() || [];
+    document.getElementById('d-users').textContent = users.filter(u=>u.is_active).length;
+    document.getElementById('d-roles').textContent = roles.length;
+    document.getElementById('d-files').textContent = '—';
+    document.getElementById('d-txns').textContent  = '—';
+  } catch(e){ console.warn('Dashboard load:', e.message); }
+}
+
+/* ═══ USER MANAGEMENT ════════════════════════════ */
+let allUsers=[], editUserId=null, delUserId=null, resetUserId=null, pwUserId=null, tmpPwStr='';
+
+async function loadUsers(){
+  setLoading('u-loading',true);
+  try{
+    allUsers = await Auth.getUsers() || [];
+    filterUsers(); updateUserStats();
+  }catch(e){ toast('Load users failed: '+e.message,'error'); }
+  finally{ setLoading('u-loading',false); }
+}
+
+function filterUsers(){
+  const q=document.getElementById('u-search').value.trim().toLowerCase();
+  const rf=document.getElementById('u-filter-role').value;
+  const sf=document.getElementById('u-filter-status').value;
+  const filtered = allUsers.filter(u=>{
+    const mq=!q||u.username.includes(q)||(u.full_name||'').toLowerCase().includes(q)||(u.email||'').includes(q);
+    const mr=!rf||u.role===rf;
+    const ms=!sf||(sf==='active'?u.is_active:!u.is_active);
+    return mq&&mr&&ms;
+  });
+  renderUsers(filtered);
+}
+
+function renderUsers(users){
+  const tb=document.getElementById('u-tbody');
+  if(!users.length){ tb.innerHTML='<tr class="empty-td"><td colspan="10">NO USERS FOUND</td></tr>'; return; }
+  tb.innerHTML=users.map((u,i)=>{
+    const isSelf=u.id===S.id, isAdmin=S.role==='admin';
+    return `<tr class="row-in">
+      <td style="color:#1E3A5F;font-size:9px">${i+1}</td>
+      <td class="td-bold">${esc(u.username)}${isSelf?'<span class="self-tag">YOU</span>':''}</td>
+      <td>${esc(u.full_name||'—')}</td>
+      <td style="font-size:10px;color:#475569">${esc(u.email||'—')}</td>
+      <td>${roleBadge(u.role)}</td>
+      <td><div class="${u.is_active?'sb-on':'sb-off'}"><div class="sdot" style="background:${u.is_active?'#69FF47':'#FF4757'}"></div>${u.is_active?'ACTIVE':'INACTIVE'}</div></td>
+      <td style="font-size:9px;color:#475569">${esc(u.created_by||'—')}</td>
+      <td style="font-size:9px;color:#475569">${fmtDate(u.created_date)}</td>
+      <td style="font-size:9px;color:#475569">${esc(u.updated_by||'—')}</td>
+      <td><div class="acts">
+        ${isAdmin?`<button class="ba ba-c" onclick="openEditUser('${u.id}')">EDIT</button>`:''}
+        ${isAdmin?`<button class="ba ba-y" onclick="openPw('${u.id}')">PASSWORD</button>`:''}
+        ${isAdmin?`<button class="ba ba-p" onclick="openReset('${u.id}')">RESET</button>`:''}
+        ${isAdmin&&!isSelf?`<button class="ba ba-o" onclick="toggleActive('${u.id}',${!u.is_active})">${u.is_active?'DISABLE':'ENABLE'}</button>`:''}
+        ${isAdmin&&!isSelf?`<button class="ba ba-r" onclick="openDel('${u.id}')">DELETE</button>`:''}
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function updateUserStats(){
+  const v=allUsers.filter(u=>!u.deleted_at);
+  document.getElementById('u-stat-total').textContent=v.length;
+  document.getElementById('u-stat-active').textContent=v.filter(u=>u.is_active).length;
+  document.getElementById('u-stat-admin').textContent=v.filter(u=>u.role==='admin').length;
+  document.getElementById('d-users').textContent=v.filter(u=>u.is_active).length;
+}
+
+function openCreateUser(){
+  editUserId=null;
+  document.getElementById('m-user-title').textContent='NEW USER';
+  document.getElementById('m-user-btn').textContent='CREATE USER';
+  document.getElementById('m-uname').value=''; document.getElementById('m-uname').readOnly=false; document.getElementById('m-uname').style.color='';
+  document.getElementById('m-fullname').value=''; document.getElementById('m-email').value=''; document.getElementById('m-role').value='operator'; document.getElementById('m-pw').value='';
+  document.getElementById('m-pw-wrap').style.display='block';
+  applyBars(0,['mpb1','mpb2','mpb3','mpb4']); clrErr('m-err-uname','m-err-fullname','m-err-pw');
+  openM('m-user'); setTimeout(()=>document.getElementById('m-uname').focus(),200);
+}
+
+function openEditUser(id){
+  const u=allUsers.find(x=>x.id===id); if(!u) return; editUserId=id;
+  document.getElementById('m-user-title').textContent='EDIT USER';
+  document.getElementById('m-user-btn').textContent='SAVE CHANGES';
+  document.getElementById('m-uname').value=u.username; document.getElementById('m-uname').readOnly=true; document.getElementById('m-uname').style.color='#475569';
+  document.getElementById('m-fullname').value=u.full_name||''; document.getElementById('m-email').value=u.email||''; document.getElementById('m-role').value=u.role||'viewer';
+  document.getElementById('m-pw-wrap').style.display='none'; clrErr('m-err-uname','m-err-fullname','m-err-pw');
+  openM('m-user'); setTimeout(()=>document.getElementById('m-fullname').focus(),200);
+}
+
+async function submitUser(){
+  clrErr('m-err-uname','m-err-fullname','m-err-pw');
+  const username=document.getElementById('m-uname').value.trim().toLowerCase();
+  const fullName=document.getElementById('m-fullname').value.trim();
+  const email=document.getElementById('m-email').value.trim();
+  const role=document.getElementById('m-role').value;
+  const pw=document.getElementById('m-pw').value;
+  let ok=true;
+  if(!username){document.getElementById('m-err-uname').textContent='Username required';ok=false;}
+  if(!fullName){document.getElementById('m-err-fullname').textContent='Full name required';ok=false;}
+  if(editUserId===null&&!pw){document.getElementById('m-err-pw').textContent='Password required';ok=false;}
+  if(editUserId===null&&pw&&pw.length<8){document.getElementById('m-err-pw').textContent='Min 8 characters';ok=false;}
+  if(!ok) return;
+  setBtnLoading('m-user-btn',true,editUserId?'SAVE CHANGES':'CREATE USER');
+  const res = editUserId===null
+    ? await Auth.createUser({username,fullName,email,role,password:pw})
+    : await Auth.updateUser(editUserId,{fullName,email,role});
+  setBtnLoading('m-user-btn',false,editUserId?'SAVE CHANGES':'CREATE USER');
+  if(!res.ok){ toast(res.error,'error'); if(res.error.includes('username')) document.getElementById('m-err-uname').textContent=res.error; return; }
+  closeM('m-user'); toast(editUserId?'✓ User updated':'✓ User "'+username+'" created','success'); await loadUsers();
+}
+
+function openPw(id){ const u=allUsers.find(x=>x.id===id); if(!u)return; pwUserId=id; document.getElementById('mpw-user').value=u.username; document.getElementById('mpw-new').value=''; document.getElementById('mpw-confirm').value=''; applyBars(0,['ppb1','ppb2','ppb3','ppb4']); clrErr('mpw-err','mpw-err2'); openM('m-pw'); setTimeout(()=>document.getElementById('mpw-new').focus(),200); }
+async function submitPw(){ clrErr('mpw-err','mpw-err2'); const p1=document.getElementById('mpw-new').value, p2=document.getElementById('mpw-confirm').value; let ok=true; if(!p1||p1.length<8){document.getElementById('mpw-err').textContent='Min 8 characters';ok=false;} if(p1!==p2){document.getElementById('mpw-err2').textContent='Passwords do not match';ok=false;} if(!ok)return; setBtnLoading('mpw-btn',true,'SAVE PASSWORD'); const res=await Auth.changePassword(pwUserId,p1); setBtnLoading('mpw-btn',false,'SAVE PASSWORD'); if(!res.ok){toast(res.error,'error');return;} closeM('m-pw'); toast('✓ Password changed','success'); }
+
+function openReset(id){ const u=allUsers.find(x=>x.id===id); if(!u)return; resetUserId=id; tmpPwStr=Array.from({length:12},()=>'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789@#!'[Math.floor(Math.random()*60)]).join(''); document.getElementById('mreset-name').textContent=u.full_name+' ('+u.username+')'; document.getElementById('mreset-tmpw').textContent=tmpPwStr; openM('m-reset'); }
+function copyTmp(){ navigator.clipboard?.writeText(tmpPwStr).then(()=>toast('Copied!','info')); }
+async function confirmReset(){ setBtnLoading('mreset-btn',true,'CONFIRM RESET'); const res=await Auth.changePassword(resetUserId,tmpPwStr); setBtnLoading('mreset-btn',false,'CONFIRM RESET'); if(!res.ok){toast(res.error,'error');return;} closeM('m-reset'); toast('✓ Password reset','success'); }
+
+async function toggleActive(id,state){ const res=await Auth.setUserActive(id,state); if(!res.ok){toast(res.error,'error');return;} toast(state?'✓ User enabled':'✓ User disabled','success'); await loadUsers(); }
+function openDel(id){ const u=allUsers.find(x=>x.id===id); if(!u)return; delUserId=id; document.getElementById('mdel-name').textContent=u.full_name+' ('+u.username+')'; openM('m-del'); }
+async function confirmDel(){ setBtnLoading('mdel-btn',true,'DELETE USER'); const res=await Auth.deleteUser(delUserId); setBtnLoading('mdel-btn',false,'DELETE USER'); if(!res.ok){toast(res.error,'error');return;} closeM('m-del'); toast('✓ User deleted','success'); await loadUsers(); }
+
+/* ═══ CHANGE OWN PASSWORD ════════════════════════ */
+async function submitChangePw(){
+  clrErr('cpw-err-current','cpw-err-new','cpw-err-confirm');
+  const cur=document.getElementById('cpw-current').value;
+  const nw=document.getElementById('cpw-new').value;
+  const cf=document.getElementById('cpw-confirm').value;
+  let ok=true;
+  if(!cur){document.getElementById('cpw-err-current').textContent='Required';ok=false;}
+  if(!nw||nw.length<8){document.getElementById('cpw-err-new').textContent='Min 8 characters';ok=false;}
+  if(nw!==cf){document.getElementById('cpw-err-confirm').textContent='Passwords do not match';ok=false;}
+  if(!ok) return;
+  // Verify current password by logging in
+  const verify=await Auth.login(S.username,cur);
+  if(!verify.ok){document.getElementById('cpw-err-current').textContent='Current password is incorrect';return;}
+  const btn=document.getElementById('cpw-btn'); btn.disabled=true; btn.textContent='SAVING...';
+  const res=await Auth.changePassword(S.id,nw);
+  btn.disabled=false; btn.textContent='CHANGE PASSWORD';
+  if(!res.ok){toast(res.error,'error');return;}
+  document.getElementById('cpw-current').value=''; document.getElementById('cpw-new').value=''; document.getElementById('cpw-confirm').value='';
+  applyBars(0,['cpb1','cpb2','cpb3','cpb4']);
+  toast('✓ Password changed successfully','success');
+}
+
+/* ═══ ROLE MANAGEMENT ════════════════════════════ */
+let allRoles=[], editRoleId=null;
+
+async function loadRoles(){
+  setLoading('r-loading',true);
+  try{ allRoles=await Auth.getRoles()||[]; filterRoles(); document.getElementById('r-stat-total').textContent=allRoles.length; document.getElementById('d-roles').textContent=allRoles.length; }
+  catch(e){ toast('Load roles failed: '+e.message,'error'); }
+  finally{ setLoading('r-loading',false); }
+}
+
+function filterRoles(){
+  const q=document.getElementById('r-search').value.trim().toLowerCase();
+  const filtered=allRoles.filter(r=>!q||r.role_name.includes(q)||(r.description||'').toLowerCase().includes(q));
+  const tb=document.getElementById('r-tbody');
+  if(!filtered.length){tb.innerHTML='<tr class="empty-td"><td colspan="6">NO ROLES FOUND</td></tr>';return;}
+  tb.innerHTML=filtered.map((r,i)=>`<tr class="row-in">
+    <td style="color:#1E3A5F;font-size:9px">${i+1}</td>
+    <td class="td-bold">${esc(r.role_name)}</td>
+    <td style="color:#475569">${esc(r.description||'—')}</td>
+    <td style="font-size:9px;color:#475569">${esc(r.created_by||'—')}</td>
+    <td style="font-size:9px;color:#475569">${fmtDate(r.created_date)}</td>
+    <td><div class="acts"><button class="ba ba-c" onclick="openEditRole('${r.id}')">EDIT</button><button class="ba ba-r" onclick="deleteRole('${r.id}')">DELETE</button></div></td>
+  </tr>`).join('');
+}
+
+function openCreateRole(){ editRoleId=null; document.getElementById('m-role-title').textContent='NEW ROLE'; document.getElementById('mr-btn').textContent='CREATE ROLE'; document.getElementById('mr-name').value=''; document.getElementById('mr-desc').value=''; clrErr('mr-err-name'); openM('m-role'); setTimeout(()=>document.getElementById('mr-name').focus(),200); }
+function openEditRole(id){ const r=allRoles.find(x=>x.id===id); if(!r)return; editRoleId=id; document.getElementById('m-role-title').textContent='EDIT ROLE'; document.getElementById('mr-btn').textContent='SAVE CHANGES'; document.getElementById('mr-name').value=r.role_name; document.getElementById('mr-desc').value=r.description||''; clrErr('mr-err-name'); openM('m-role'); }
+async function submitRole(){ clrErr('mr-err-name'); const rn=document.getElementById('mr-name').value.trim(); const desc=document.getElementById('mr-desc').value.trim(); if(!rn){document.getElementById('mr-err-name').textContent='Role name required';return;} setBtnLoading('mr-btn',true,editRoleId?'SAVE CHANGES':'CREATE ROLE'); const res=editRoleId===null?await Auth.createRole({roleName:rn,description:desc}):await Auth.updateRole(editRoleId,{roleName:rn,description:desc}); setBtnLoading('mr-btn',false,editRoleId?'SAVE CHANGES':'CREATE ROLE'); if(!res.ok){toast(res.error,'error');return;} closeM('m-role'); toast(editRoleId?'✓ Role updated':'✓ Role created','success'); await loadRoles(); }
+async function deleteRole(id){ if(!confirm('Delete this role?')) return; const res=await Auth.deleteRole(id); if(!res.ok){toast(res.error,'error');return;} toast('✓ Role deleted','success'); await loadRoles(); }
+
+/* ═══ AUDIT LOGS ═════════════════════════════════ */
+async function loadLogs(){
+  try{
+    // Use db.js if available
+    if(typeof db !== 'undefined'){
+      const logs=await db.getLogs(100)||[];
+      const tb=document.getElementById('log-tbody');
+      if(!logs.length){tb.innerHTML='<tr class="empty-td"><td colspan="5">No logs found</td></tr>';return;}
+      tb.innerHTML=logs.map((l,i)=>`<tr class="row-in"><td style="color:#1E3A5F;font-size:9px">${i+1}</td><td class="td-bold">${esc(l.action)}</td><td style="color:#475569">${esc(l.resource||'—')}</td><td><span class="rb ${l.result==='SUCCESS'?'rb-operator':l.result==='FAILURE'?'rb-admin':'rb-viewer'}">${esc(l.result||'—')}</span></td><td style="font-size:9px;color:#475569">${fmtDate(l.created_at)}</td></tr>`).join('');
+    } else { document.getElementById('log-tbody').innerHTML='<tr class="empty-td"><td colspan="5">db.js not loaded — audit logs unavailable</td></tr>'; }
+  }catch(e){ toast('Load logs failed: '+e.message,'error'); }
+}
+
+/* ═══ FILE HISTORY ═══════════════════════════════ */
+async function loadFileHistory(){
+  try{
+    if(typeof db !== 'undefined'){
+      const files=await db.getFiles()||[];
+      const tb=document.getElementById('fh-tbody');
+      if(!files.length){tb.innerHTML='<tr class="empty-td"><td colspan="7">No files saved yet</td></tr>';return;}
+      tb.innerHTML=files.map((f,i)=>`<tr class="row-in"><td style="color:#1E3A5F;font-size:9px">${i+1}</td><td class="td-bold" style="font-size:10px">${esc(f.file_name)}</td><td style="font-size:9px;color:#00E5FF">${esc(f.format||'—')}</td><td>${f.row_count||0}</td><td style="font-size:9px">${fmtBytes(f.file_size)}</td><td style="font-size:9px;color:#475569">${fmtDate(f.uploaded_at)}</td><td><span class="rb rb-operator">${esc(f.status||'PARSED')}</span></td></tr>`).join('');
+    }
+  }catch(e){ toast('Load history failed: '+e.message,'error'); }
+}
+
+/* ═══ CLOSE MODALS ON BACKDROP ═══════════════════ */
+document.querySelectorAll('.mbd').forEach(b=>b.addEventListener('click',e=>{if(e.target===b)b.classList.remove('open');}));
+</script>
+</body>
+</html>
