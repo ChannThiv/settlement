@@ -328,7 +328,7 @@ const Auth = {
   isConfigured() {
     return (
       AUTH_SUPABASE_URL      !== 'https://YOUR_PROJECT_REF.supabase.co' &&
-      AUTH_SUPABASE_ANON_KEY !== 'YOUR_ANON_PUBLIC_KEY'
+      AUTH_SUPABASE_ANON_KEY !== 'sb_publishable_u3k5r8xCtireQeps4DsgRg_JgUg_LTk'
     );
   },
 
