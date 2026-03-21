@@ -1,0 +1,97 @@
+/* ═══════════════════════════════════════════════════════════════════
+   CHANN THIV SETTLEMENT — DESIGN TOKENS
+   css/tokens.css
+
+   Single source of truth for all design variables.
+   Import this file first in every page.
+═══════════════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  /* ── Fonts ──────────────────────────────────────────────────── */
+  --font-ui   : 'Inter', system-ui, 'Segoe UI', Arial, sans-serif;
+  --font-data : 'IBM Plex Mono', 'Courier New', monospace;
+  --font-brand: 'Bebas Neue', 'Arial Narrow', Arial, sans-serif;
+
+  /* ── Background palette ─────────────────────────────────────── */
+  --bg-base   : #060A12;
+  --bg-surface: #080D18;
+  --bg-raised : #0A1020;
+  --bg-hover  : #101828;
+
+  /* ── Border palette ─────────────────────────────────────────── */
+  --border-dim: #0D1F35;
+  --border    : #1C2E4A;
+  --border-hi : #2E4468;
+
+  /* ── Text palette ───────────────────────────────────────────── */
+  --text-primary  : #E8EDF5;
+  --text-secondary: #8A9BB8;
+  --text-tertiary : #4F6080;
+  --text-muted    : #2E4060;
+
+  /* ── Accent palette ─────────────────────────────────────────── */
+  --cyan   : #00D4F5;
+  --green  : #22C55E;
+  --gold   : #EAB308;
+  --red    : #EF4444;
+  --purple : #A78BFA;
+  --orange : #F97316;
+  --slate  : #94A3B8;
+
+  /* Semi-transparent variants */
+  --cyan-a12  : rgba(0, 212, 245, .12);
+  --cyan-a25  : rgba(0, 212, 245, .25);
+  --green-a12 : rgba(34, 197, 94, .12);
+  --gold-a12  : rgba(234, 179, 8, .12);
+  --red-a12   : rgba(239, 68, 68, .12);
+  --purple-a12: rgba(167, 139, 250, .12);
+
+  /* ── Format accent colors ───────────────────────────────────── */
+  --color-ifo-bin : #00D4F5;
+  --color-ifd-icom: #22C55E;
+  --color-ifd-comn: #F97316;
+  --color-ifd-fdtl: #EAB308;
+  --color-ifd-err : #EF4444;
+  --color-ifd-errn: #A78BFA;
+  --color-raw     : #94A3B8;
+
+  /* ── Spacing ────────────────────────────────────────────────── */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* ── Radius ─────────────────────────────────────────────────── */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+
+  /* ── Shadows ────────────────────────────────────────────────── */
+  --shadow-sm: 0 1px 4px rgba(0,0,0,.4);
+  --shadow-md: 0 4px 20px rgba(0,0,0,.5);
+  --shadow-lg: 0 16px 48px rgba(0,0,0,.65);
+
+  /* ── Z-index scale ──────────────────────────────────────────── */
+  --z-base   : 1;
+  --z-sticky : 10;
+  --z-sidebar: 20;
+  --z-header : 30;
+  --z-overlay: 100;
+  --z-toast  : 200;
+
+  /* ── Transitions ────────────────────────────────────────────── */
+  --ease-fast  : 120ms ease;
+  --ease-normal: 200ms ease;
+  --ease-slow  : 300ms ease;
+
+  /* ── Layout ─────────────────────────────────────────────────── */
+  --sidebar-w: 220px;
+  --header-h : 56px;
+  --taskbar-h: 40px;
+}

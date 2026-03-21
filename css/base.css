@@ -1,0 +1,112 @@
+/* ═══════════════════════════════════════════════════════════════════
+   CHANN THIV SETTLEMENT — BASE STYLES
+   css/base.css
+
+   Reset, typography, scrollbar, and global utility classes.
+   Import after tokens.css.
+═══════════════════════════════════════════════════════════════════ */
+
+/* ── Reset ──────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg-base);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  color: var(--text-secondary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Scrollbar ──────────────────────────────────────────────────── */
+::-webkit-scrollbar          { width: 4px; height: 4px; }
+::-webkit-scrollbar-track    { background: transparent; }
+::-webkit-scrollbar-thumb    { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-hi); }
+
+/* ── Typography base ────────────────────────────────────────────── */
+h1, h2, h3, h4 {
+  font-family: var(--font-brand);
+  color: var(--text-primary);
+  line-height: 1.1;
+  letter-spacing: 2px;
+}
+
+p, span, label, li, a {
+  font-family: var(--font-ui);
+}
+
+code, pre, kbd {
+  font-family: var(--font-data);
+}
+
+/* ── Focus ring ─────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ── Link reset ─────────────────────────────────────────────────── */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ── Button reset ───────────────────────────────────────────────── */
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: var(--font-ui);
+}
+
+/* ── Input reset ────────────────────────────────────────────────── */
+input, select, textarea {
+  font-family: var(--font-data);
+  color: var(--text-secondary);
+}
+
+/* ── Utility: visually hidden ────────────────────────────────────── */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  border: 0;
+}
+
+/* ── Utility: text colors ───────────────────────────────────────── */
+.text-primary   { color: var(--text-primary) !important; }
+.text-secondary { color: var(--text-secondary) !important; }
+.text-muted     { color: var(--text-muted) !important; }
+.text-cyan      { color: var(--cyan) !important; }
+.text-green     { color: var(--green) !important; }
+.text-gold      { color: var(--gold) !important; }
+.text-red       { color: var(--red) !important; }
+
+/* ── Utility: display ───────────────────────────────────────────── */
+.d-none  { display: none !important; }
+.d-flex  { display: flex !important; }
+.d-block { display: block !important; }
+
+/* ── Utility: font families ─────────────────────────────────────── */
+.font-brand { font-family: var(--font-brand) !important; }
+.font-data  { font-family: var(--font-data) !important; }
+.font-ui    { font-family: var(--font-ui) !important; }
+.tabular    { font-variant-numeric: tabular-nums; }
+
+/* ── Animations ─────────────────────────────────────────────────── */
+@keyframes spin    { to { transform: rotate(360deg); } }
+@keyframes pulse   { 0%,100%{opacity:1} 50%{opacity:.3} }
+@keyframes fadeUp  { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+@keyframes fadeIn  { from{opacity:0} to{opacity:1} }
+@keyframes slideIn { from{opacity:0;transform:translateX(-8px)} to{opacity:1;transform:translateX(0)} }
+@keyframes glow    { 0%,100%{box-shadow:0 0 4px currentColor} 50%{box-shadow:0 0 12px currentColor} }

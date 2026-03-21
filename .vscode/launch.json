@@ -1,13 +1,37 @@
+
 {
-    "version": "0.2.0",
-    "configurations": [
-        
-        {
-            "type": "chrome",
-            "request": "launch",
-            "name": "Debug Settlement App",
-            "url": "http://127.0.0.1:5500/login.html",
-            "webRoot": "${workspaceFolder}"
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "▶ Login Page",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://127.0.0.1:5500/login.html",
+      "webRoot": "${workspaceFolder}",
+      "sourceMapPathOverrides": {
+        "webpack:///./src/*": "${webRoot}/*"
+      }
+    },
+    {
+      "name": "▶ System Dashboard",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:5500/system.html",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "▶ File Parser",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:5500/index.html",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "🔗 Attach to Chrome",
+      "type": "chrome",
+      "request": "attach",
+      "port": 9222,
+      "webRoot": "${workspaceFolder}"
+    }
+  ]
 }

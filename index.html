@@ -1,49 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>IFD File Parser System</title>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="./css/style.css"/>
-  <link rel="stylesheet" href="./css/db.css"/>
-  <link rel="stylesheet" href="./css/typography.css">
+  <title>IFD File Parser — Chann Thiv Settlement</title>
+  <link rel="stylesheet" href="./css/tokens.css"/>
+  <link rel="stylesheet" href="./css/base.css"/>
+  <link rel="stylesheet" href="./css/components.css"/>
+  <link rel="stylesheet" href="./css/parser.css"/>
 </head>
 <body>
 
-  <!-- ═══════════════════════ HEADER ═══════════════════════════ -->
-  <div id="header">
-    <div id="header-left">
-      <div id="logo">CT</div>
-      <div>
-        <div id="app-title">CHANN THIV SETTLEMENT</div>
-        <div id="app-sub">INTERBANK FILE DISPATCHER · FIXED-WIDTH PARSER · SUPABASE CONNECTED</div>
+  <!-- ── Header ─────────────────────────────────────────────────── -->
+  <header class="app-header">
+    <a href="./system.html" class="app-logo" title="System Dashboard">CT</a>
+    <div>
+      <div class="app-title">Chann Thiv Settlement</div>
+      <div class="app-subtitle">Interbank File Dispatcher · Fixed-Width Parser · Supabase Connected</div>
+    </div>
+    <div class="header-right">
+      <div class="h-badge" id="badge-db" onclick="openModal('m-db-config')">
+        <span class="status-dot offline" id="db-dot"></span>
+        <span id="db-label">DB Offline</span>
+      </div>
+      <div class="h-badge" id="badge-files" style="display:none">— Files Loaded</div>
+      <div class="h-badge" style="border-color:rgba(34,197,94,.2);color:var(--green);background:var(--green-a12)">
+        <span class="status-dot pulse"></span> System Ready
       </div>
     </div>
-    <div id="header-right">
-      <div class="badge" id="badge-db">
-        <span id="db-dot" class="db-dot"></span>
-        <span id="db-label">DB OFFLINE</span>
-      </div>
-      <div class="badge" id="badge-files">— FILES LOADED</div>
-      <div class="badge" id="badge-status">
-        <span class="pulse-dot"></span> SYSTEM READY
-      </div>
-    </div>
-  </div>
+  </header>
 
-  <!-- ═══════════════════════ LAYOUT ═══════════════════════════ -->
+  <!-- ── Layout ─────────────────────────────────────────────────── -->
   <div id="layout">
 
-    <!-- SIDEBAR -->
-    <div id="sidebar">
-      <div id="sidebar-title">FORMAT LEGEND</div>
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar">
+      <div class="nav-section" style="padding-top:14px">Format Legend</div>
       <div id="format-legend"></div>
 
-      <!-- DB History Panel -->
+      <!-- DB History panel -->
       <div id="db-history-wrap">
         <div id="db-history-title">
-          <span>DATABASE HISTORY</span>
+          <span>Database History</span>
           <button id="btn-refresh-history" onclick="loadDbHistory()" title="Refresh">↻</button>
         </div>
         <div id="db-history-list">
@@ -52,22 +50,25 @@
       </div>
 
       <div id="sidebar-bottom">
-        <button class="btn" id="btn-upload" onclick="document.getElementById('file-input').click()">
-          ＋ UPLOAD FILES
+        <button class="btn btn-ghost" id="btn-upload"
+          onclick="document.getElementById('file-input').click()">
+          ＋ Upload Files
         </button>
-        <button class="btn btn-db" id="btn-save-db" onclick="saveCurrentFileToDb()" style="display:none">
-          ⬆ SAVE TO DATABASE
+        <button class="btn" id="btn-save-db" style="display:none;background:var(--green-a12);border:1px solid rgba(34,197,94,.3);color:var(--green)"
+          onclick="saveCurrentFileToDb()">
+          ⬆ Save to Database
         </button>
-        <button class="btn" id="btn-clear" onclick="clearAll()" style="display:none">
-          ✕ CLEAR ALL
+        <button class="btn btn-ghost" id="btn-clear" style="display:none"
+          onclick="clearAll()">
+          ✕ Clear All
         </button>
       </div>
-    </div>
+    </aside>
 
-    <!-- MAIN CONTENT -->
-    <div id="main">
+    <!-- Main content -->
+    <main id="main">
 
-      <!-- DROP ZONE -->
+      <!-- Drop zone (shown when no files loaded) -->
       <div id="dropzone-wrap">
         <div id="dropzone"
           ondragover="onDragOver(event)"
@@ -76,8 +77,8 @@
           onclick="document.getElementById('file-input').click()">
 
           <div id="loading-wrap" style="display:none">
-            <div id="spinner"></div>
-            <div id="loading-text">PROCESSING FILES...</div>
+            <div class="spinner spinner-lg" style="margin:0 auto 24px"></div>
+            <div id="loading-text">Processing files... 0%</div>
             <div id="progress-bar-wrap">
               <div id="progress-bar"></div>
             </div>
@@ -85,62 +86,64 @@
 
           <div id="dz-content">
             <div id="dz-icon">⬆</div>
-            <div id="dz-title">DROP FILES HERE</div>
+            <div id="dz-title">Drop Files Here</div>
             <div id="dz-sub">
               Drag &amp; drop IFD / IFO format files or click to browse<br>
               Format auto-detected · Multiple files supported
             </div>
             <div id="dz-tags">
-              <span class="dz-tag" style="color:#00E5FF;border-color:#00E5FF44">IFO*BIN</span>
-              <span class="dz-tag" style="color:#69FF47;border-color:#69FF4744">IFD*.COM</span>
-              <span class="dz-tag" style="color:#FF6B35;border-color:#FF6B3544">IFD*.OMN</span>
-              <span class="dz-tag" style="color:#FFD700;border-color:#FFD70044">IFD*.DTL</span>
-              <span class="dz-tag" style="color:#FF4757;border-color:#FF475744">IFD*.ERR</span>
-              <span class="dz-tag" style="color:#A855F7;border-color:#A855F744">IFD*.RRN</span>
+              <span class="dz-tag" style="color:var(--color-ifo-bin);border-color:rgba(0,212,245,.3)">IFO*BIN</span>
+              <span class="dz-tag" style="color:var(--color-ifd-icom);border-color:rgba(34,197,94,.3)">IFD*.COM</span>
+              <span class="dz-tag" style="color:var(--color-ifd-comn);border-color:rgba(249,115,22,.3)">IFD*.OMN</span>
+              <span class="dz-tag" style="color:var(--color-ifd-fdtl);border-color:rgba(234,179,8,.3)">IFD*.DTL</span>
+              <span class="dz-tag" style="color:var(--color-ifd-err);border-color:rgba(239,68,68,.3)">IFD*.ERR</span>
+              <span class="dz-tag" style="color:var(--color-ifd-errn);border-color:rgba(167,139,250,.3)">IFD*.RRN</span>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- FILE VIEW -->
+      <!-- File view (shown when files are loaded) -->
       <div id="file-view" style="display:none">
 
-        <!-- Tabs -->
+        <!-- Tab bar -->
         <div id="tabs-bar">
           <div id="tab-add-wrap">
-            <button id="tab-add-btn" onclick="document.getElementById('file-input').click()">＋ ADD</button>
+            <button id="tab-add-btn" onclick="document.getElementById('file-input').click()">＋ Add</button>
           </div>
         </div>
 
         <!-- Toolbar -->
         <div id="toolbar">
-          <div id="search-wrap">
-            <span id="search-icon">⌕</span>
+          <div class="search-wrap" style="max-width:320px">
+            <span class="search-icon">⌕</span>
             <input id="search-input" type="text" placeholder="Search all columns..."
               oninput="onSearch(this.value)"/>
-            <span id="search-clear" onclick="clearSearch()" style="display:none">✕</span>
+            <span id="search-clear" onclick="clearSearch()" style="display:none;cursor:pointer;color:var(--text-muted)">✕</span>
           </div>
-          <div id="format-badge" class="badge">—</div>
-          <div id="stats">
-            <span><span class="stat-label">ROWS </span><span class="stat-val" id="stat-rows">0</span></span>
-            <span><span class="stat-label">COLS </span><span class="stat-val" id="stat-cols">0</span></span>
-            <span><span class="stat-label">SIZE </span><span class="stat-val" id="stat-size">—</span></span>
-            <span id="filter-note"></span>
+          <div id="format-badge" class="h-badge">—</div>
+          <div id="stats" style="display:flex;gap:16px;font-size:10px;flex-shrink:0">
+            <span><span style="color:var(--text-muted);letter-spacing:1px">ROWS </span><span id="stat-rows" style="color:var(--text-secondary);font-family:var(--font-data);font-weight:600">0</span></span>
+            <span><span style="color:var(--text-muted);letter-spacing:1px">COLS </span><span id="stat-cols" style="color:var(--text-secondary);font-family:var(--font-data);font-weight:600">0</span></span>
+            <span><span style="color:var(--text-muted);letter-spacing:1px">SIZE </span><span id="stat-size" style="color:var(--text-secondary);font-family:var(--font-data);font-weight:600">—</span></span>
+            <span id="filter-note" style="display:none;color:var(--gold)"></span>
           </div>
-          <!-- DB Save Button in toolbar -->
-          <button id="btn-save-db-toolbar" class="btn-toolbar-db" onclick="saveCurrentFileToDb()" style="display:none">
-            ⬆ SAVE TO DB
+          <button id="btn-save-db-toolbar" style="display:none;padding:5px 12px;background:none;border:1px solid rgba(34,197,94,.3);color:var(--green);font-size:10px;letter-spacing:1px;border-radius:var(--radius-sm);cursor:pointer;transition:all var(--ease-fast)"
+            onmouseover="this.style.background='var(--green-a12)'" onmouseout="this.style.background='none'"
+            onclick="saveCurrentFileToDb()">⬆ Save to DB</button>
+          <button id="btn-export" onclick="exportCSV()"
+            style="margin-left:auto;background:none;border-radius:var(--radius-sm);padding:6px 16px;font-size:10px;font-family:var(--font-ui);font-weight:600;letter-spacing:1px;cursor:pointer;transition:all var(--ease-fast)">
+            ↓ Export CSV
           </button>
-          <button id="btn-export" onclick="exportCSV()">↓ EXPORT CSV</button>
         </div>
 
-        <!-- DB Save Progress Bar -->
-        <div id="db-save-bar" style="display:none">
-          <div id="db-save-progress"></div>
-          <span id="db-save-label">Saving to Supabase... 0%</span>
+        <!-- DB save progress bar -->
+        <div id="db-save-bar" style="display:none;align-items:center;gap:12px;padding:6px 16px;background:rgba(34,197,94,.04);border-bottom:1px solid rgba(34,197,94,.15)">
+          <div id="db-save-progress" style="height:2px;background:var(--green);width:0;transition:width .3s ease;flex:1;box-shadow:0 0 8px rgba(34,197,94,.4)"></div>
+          <span id="db-save-label" style="font-size:9px;color:var(--green);letter-spacing:1px;white-space:nowrap;min-width:180px;text-align:right">Saving...</span>
         </div>
 
-        <!-- Data Table -->
+        <!-- Data table -->
         <div id="table-wrap">
           <table id="data-table">
             <thead id="table-head"></thead>
@@ -148,35 +151,33 @@
           </table>
         </div>
 
-        <!-- Status Bar -->
+        <!-- Status bar -->
         <div id="status-bar">
-          <span id="status-left">IFD PARSER · PAN MASKING ACTIVE · 🔒 CARD DATA PROTECTED</span>
+          <span id="status-left">IFD Parser · PAN Masking Active · 🔒 Card Data Protected</span>
           <div id="status-files"></div>
-          <span id="status-right">CLICK ANY CELL TO COPY · ⬆ SAVE TO DB TO PERSIST</span>
+          <span id="status-right">Click any cell to copy</span>
         </div>
+      </div>
 
-      </div><!-- /file-view -->
-    </div><!-- /main -->
-  </div><!-- /layout -->
+    </main>
+  </div><!-- /#layout -->
 
   <!-- DB Config Modal -->
-  <div id="db-modal-overlay" style="display:none" onclick="closeDbModal()">
-    <div id="db-modal" onclick="event.stopPropagation()">
-      <div id="db-modal-title">⚙ SUPABASE CONFIGURATION</div>
-      <div id="db-modal-sub">Update your connection settings in js/db.js</div>
-      <div class="db-modal-field">
-        <label>Project URL</label>
-        <code id="db-modal-url">—</code>
+  <div class="modal-backdrop" id="m-db-config">
+    <div class="modal" style="max-width:420px">
+      <div class="modal-header">
+        <div class="modal-title">⚙ Supabase Configuration</div>
+        <button class="modal-close" onclick="closeModal('m-db-config')">✕</button>
       </div>
-      <div class="db-modal-field">
-        <label>Status</label>
-        <span id="db-modal-status">—</span>
+      <div class="fg">
+        <label class="field-label">Project URL</label>
+        <code id="db-modal-url" style="display:block;background:var(--bg-base);border:1px solid var(--border-dim);padding:7px 10px;font-size:10px;color:var(--cyan);word-break:break-all;border-radius:var(--radius-sm)">—</code>
       </div>
-      <div class="db-modal-hint">
-        Get your URL and anon key from:<br>
+      <div style="font-size:11px;color:var(--text-muted);line-height:1.7;padding:10px;border:1px solid var(--border-dim);border-left:2px solid rgba(0,212,245,.3);border-radius:var(--radius-sm);margin-bottom:18px">
+        Get your credentials from:<br>
         Supabase Dashboard → Settings → API
       </div>
-      <button class="btn" onclick="closeDbModal()">CLOSE</button>
+      <button class="btn btn-ghost" onclick="closeModal('m-db-config')" style="width:100%">Close</button>
     </div>
   </div>
 
@@ -184,14 +185,12 @@
   <input type="file" id="file-input" multiple style="display:none"
     onchange="handleFileInput(this.files)"/>
 
-  <!-- Toast notification -->
-  <div id="toast">Copied!</div>
+  <div id="toast"></div>
 
-  <!-- Scripts — order matters -->
+  <!-- Scripts — load order matters -->
   <script src="./js/formats.js"></script>
   <script src="./js/db.js"></script>
+  <script src="./js/utils.js"></script>
   <script src="./js/app.js"></script>
-  <script src="./js/db-ui.js"></script>
-
 </body>
 </html>

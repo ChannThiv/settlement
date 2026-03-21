@@ -1,0 +1,435 @@
+/* ═══════════════════════════════════════════════════════════════════
+   CHANN THIV SETTLEMENT — SYSTEM DASHBOARD PAGE STYLES
+   css/system.css
+
+   Styles specific to system.html (control system dashboard).
+   Load order: tokens.css → base.css → components.css → system.css
+═══════════════════════════════════════════════════════════════════ */
+
+
+/* ══════════════════════════════════════════════════════════════════
+   1. ROOT LAYOUT
+══════════════════════════════════════════════════════════════════ */
+
+body {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+#layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   2. HEADER PROFILE (top-right user identity block)
+══════════════════════════════════════════════════════════════════ */
+
+.header-profile {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 5px 14px 5px 10px;
+  border: 1px solid rgba(234,179,8,.2);
+  border-radius: var(--radius-md);
+  background: var(--gold-a12);
+  cursor: default;
+}
+
+.header-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(234,179,8,.2);
+  border: 1px solid rgba(234,179,8,.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--gold);
+  flex-shrink: 0;
+  font-family: var(--font-ui);
+}
+
+.header-profile-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.header-profile-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  letter-spacing: .2px;
+}
+
+.header-profile-role {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  color: var(--gold);
+  text-transform: uppercase;
+  opacity: .8;
+  margin-top: 1px;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   3. SIDEBAR TOGGLE BUTTON
+══════════════════════════════════════════════════════════════════ */
+
+#sidebar-toggle {
+  position: absolute;
+  top: 64px;
+  left: calc(var(--sidebar-w) - 8px);
+  width: 16px;
+  height: 32px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-dim);
+  border-left: none;
+  border-radius: 0 4px 4px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  color: var(--text-muted);
+  cursor: pointer;
+  z-index: var(--z-sidebar);
+  transition: left var(--ease-slow), color var(--ease-fast);
+}
+
+#sidebar-toggle:hover { color: var(--cyan); }
+
+#layout:has(.sidebar.collapsed) #sidebar-toggle {
+  left: 0;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   4. CONTENT AREA
+══════════════════════════════════════════════════════════════════ */
+
+#content-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   5. DROPDOWN ARROW — SVG chevron overrides
+══════════════════════════════════════════════════════════════════ */
+
+.dd-arrow {
+  /* Now an SVG element, not a text character */
+  flex-shrink: 0;
+  color: var(--text-muted);
+  transition: transform var(--ease-normal), color var(--ease-fast);
+  display: block;
+  margin-left: auto;
+}
+
+.dd-header:hover .dd-arrow { color: var(--text-secondary); }
+
+/* Rotate SVG chevron when open */
+.dd.open .dd-arrow { transform: rotate(180deg); }
+
+
+/* ══════════════════════════════════════════════════════════════════
+   6. TASKBAR
+══════════════════════════════════════════════════════════════════ */
+
+#taskbar {
+  height: var(--taskbar-h);
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-dim);
+  display: flex;
+  align-items: stretch;
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+
+#taskbar::-webkit-scrollbar { height: 2px; }
+
+.tb-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 16px;
+  border-right: 1px solid var(--border-dim);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .2px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  min-width: 110px;
+  max-width: 180px;
+  position: relative;
+  flex-shrink: 0;
+  transition: background var(--ease-fast), color var(--ease-fast);
+}
+
+.tb-tab:hover { background: var(--bg-hover); color: var(--text-secondary); }
+
+.tb-tab.active {
+  color: var(--text-primary);
+  background: var(--bg-raised);
+}
+
+.tb-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--tc, var(--cyan));
+}
+
+.tb-tab-label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: var(--font-ui);
+}
+
+.tb-close {
+  width: 16px; height: 16px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 3px;
+  font-size: 13px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  transition: all var(--ease-fast);
+}
+
+.tb-close:hover { background: var(--red-a12); color: var(--red); }
+
+#tb-home {
+  color: var(--cyan);
+  min-width: auto;
+  padding: 0 16px;
+  gap: 8px;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   7. PAGE FRAME & PANELS
+══════════════════════════════════════════════════════════════════ */
+
+#page-frame {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.page-panel {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  display: none;
+  padding: 28px 32px;
+  animation: fadeIn .2s ease;
+  scrollbar-gutter: stable;
+}
+
+.page-panel.active { display: block; }
+
+/* File parser panel needs flex layout for the table to fill height */
+#page-file-parser {
+  display: none;
+  flex-direction: column;
+}
+
+#page-file-parser.active {
+  display: flex;
+  overflow: hidden; /* table scrolls internally */
+}
+
+.ph {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  gap: var(--space-4);
+  flex-shrink: 0;
+}
+
+.ph-title {
+  font-family: var(--font-brand);
+  font-size: 26px;
+  letter-spacing: 2px;
+  color: var(--text-primary);
+  line-height: 1.1;
+}
+
+.ph-sub {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-top: 5px;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   8. EMBEDDED FILE PARSER DROPZONE
+══════════════════════════════════════════════════════════════════ */
+
+#fp-dropzone-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 0;
+}
+
+#fp-dropzone {
+  width: 100%;
+  max-width: 580px;
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius-xl);
+  padding: 56px 40px;
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--ease-normal);
+  margin: 0 auto;
+}
+
+#fp-dropzone:hover {
+  border-color: var(--cyan);
+  box-shadow: 0 0 40px rgba(0,212,245,.1);
+}
+
+#fp-file-view {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+
+
+
+/* ══════════════════════════════════════════════════════════════════
+   9. DASHBOARD CARDS
+══════════════════════════════════════════════════════════════════ */
+
+.dash-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.dash-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-lg);
+  padding: 20px 22px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color var(--ease-normal), box-shadow var(--ease-normal);
+}
+
+.dash-card:hover {
+  border-color: var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Top accent line per card colour */
+.dash-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+}
+
+.dash-card.c-cyan::before   { background: linear-gradient(90deg, var(--cyan),   transparent); }
+.dash-card.c-green::before  { background: linear-gradient(90deg, var(--green),  transparent); }
+.dash-card.c-gold::before   { background: linear-gradient(90deg, var(--gold),   transparent); }
+.dash-card.c-purple::before { background: linear-gradient(90deg, var(--purple), transparent); }
+
+/* Icon box */
+.dash-card-icon {
+  width: 36px; height: 36px;
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  margin-bottom: 14px;
+}
+
+.c-cyan-ico   { background: var(--cyan-a12);   color: var(--cyan); }
+.c-green-ico  { background: var(--green-a12);  color: var(--green); }
+.c-gold-ico   { background: var(--gold-a12);   color: var(--gold); }
+.c-purple-ico { background: var(--purple-a12); color: var(--purple); }
+
+.dash-card-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.dash-card-val {
+  font-family: var(--font-brand);
+  font-size: 40px;
+  color: var(--text-primary);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.dash-card-sub {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin-top: 6px;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   10. DASHBOARD SECTION PANEL
+══════════════════════════════════════════════════════════════════ */
+
+.dash-section {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+  margin-bottom: var(--space-5);
+}
+
+.dash-section-title {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--border-dim);
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   11. CHANGE PASSWORD PANEL
+══════════════════════════════════════════════════════════════════ */
+
+.change-pw-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  max-width: 440px;
+}

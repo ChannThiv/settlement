@@ -1,117 +1,228 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Chann Thiv Settlement — Login</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="./css/typography.css">
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;background:#070B14;font-family:'IBM Plex Mono',monospace;color:#CBD5E1;overflow:hidden}
-body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,229,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
-.orb{position:fixed;border-radius:50%;filter:blur(100px);pointer-events:none;z-index:0}
-.orb-1{width:500px;height:500px;background:rgba(0,229,255,.06);top:-150px;left:-150px}
-.orb-2{width:400px;height:400px;background:rgba(105,255,71,.04);bottom:-100px;right:-100px}
-.page{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px}
-.brand{text-align:center;margin-bottom:36px;animation:fadeDown .5s ease both}
-.brand-logo{width:52px;height:52px;background:linear-gradient(135deg,#00E5FF,#0099CC);border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue';font-size:20px;color:#070B14;margin:0 auto 14px;box-shadow:0 0 30px rgba(0,229,255,.35),0 0 60px rgba(0,229,255,.15)}
-.brand-title{font-family:'Bebas Neue';font-size:28px;letter-spacing:5px;color:#E2E8F0}
-.brand-sub{font-size:9px;color:#334155;letter-spacing:3px;margin-top:4px}
-.card{background:#080D18;border:1px solid #0D1F35;border-radius:12px;padding:36px 44px;width:100%;max-width:400px;box-shadow:0 0 0 1px rgba(0,229,255,.04),0 24px 64px rgba(0,0,0,.5);animation:fadeUp .5s .15s ease both}
-.card-title{font-size:11px;letter-spacing:2px;color:#475569;margin-bottom:28px;padding-bottom:14px;border-bottom:1px solid #0D1F35}
-.fg{margin-bottom:18px}
-.fl{display:block;font-size:9px;letter-spacing:2px;color:#475569;margin-bottom:7px}
-.fc{width:100%;background:#0A0F1E;border:1px solid #1E3A5F;border-radius:6px;padding:11px 14px;font-family:'IBM Plex Mono';font-size:13px;color:#CBD5E1;outline:none;transition:border-color .2s,box-shadow .2s}
-.fc:focus{border-color:#00E5FF66;box-shadow:0 0 0 3px rgba(0,229,255,.08)}
-.fc::placeholder{color:#1E3A5F}
-.pw-w{position:relative}.pw-w .fc{padding-right:58px}
-.pw-t{position:absolute;right:13px;top:50%;transform:translateY(-50%);background:none;border:none;color:#334155;cursor:pointer;font-size:10px;font-family:'IBM Plex Mono';letter-spacing:1px}
-.pw-t:hover{color:#00E5FF}
-.alert{border-radius:6px;padding:10px 13px;font-size:11px;margin-bottom:18px;display:none;align-items:center;gap:7px}
-.alert.show{display:flex}
-.alert-error{background:rgba(255,71,87,.1);border:1px solid rgba(255,71,87,.3);color:#FF4757}
-.alert-info{background:rgba(0,229,255,.08);border:1px solid rgba(0,229,255,.2);color:#00E5FF}
-.btn-login{width:100%;background:#00E5FF;border:none;border-radius:6px;padding:12px;font-family:'Bebas Neue';font-size:18px;letter-spacing:3px;color:#070B14;cursor:pointer;transition:all .2s;margin-top:6px}
-.btn-login:hover:not(:disabled){background:#33EEFF;box-shadow:0 0 20px rgba(0,229,255,.3);transform:translateY(-1px)}
-.btn-login:disabled{opacity:.6;cursor:not-allowed;transform:none}
-.footer{margin-top:20px;font-size:9px;color:#1E3A5F;letter-spacing:1px;text-align:center;animation:fadeUp .5s .3s ease both}
-.footer span{color:#334155}
-.spinner{display:inline-block;width:13px;height:13px;border:2px solid rgba(7,11,20,.3);border-top:2px solid #070B14;border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-right:7px}
-@keyframes fadeDown{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
-@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-@keyframes spin{to{transform:rotate(360deg)}}
-</style>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Chann Thiv Settlement — Login</title>
+  <link rel="stylesheet" href="./css/tokens.css"/>
+  <link rel="stylesheet" href="./css/base.css"/>
+  <link rel="stylesheet" href="./css/components.css"/>
+  <style>
+    body { display:flex; align-items:center; justify-content:center; flex-direction:column; min-height:100vh; overflow:auto; }
+
+    /* Grid background */
+    body::before {
+      content:''; position:fixed; inset:0;
+      background-image:
+        linear-gradient(rgba(0,212,245,.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,212,245,.03) 1px, transparent 1px);
+      background-size:40px 40px;
+      pointer-events:none; z-index:0;
+    }
+
+    /* Ambient orbs */
+    .orb { position:fixed; border-radius:50%; filter:blur(100px); pointer-events:none; z-index:0; }
+    .orb-1 { width:500px; height:500px; background:rgba(0,212,245,.06); top:-150px; left:-150px; }
+    .orb-2 { width:400px; height:400px; background:rgba(34,197,94,.04); bottom:-100px; right:-100px; }
+
+    .page-content {
+      position:relative; z-index:1;
+      display:flex; flex-direction:column; align-items:center;
+      padding:24px; width:100%; max-width:420px;
+    }
+
+    /* Brand */
+    .brand { text-align:center; margin-bottom:36px; animation:fadeUp .5s ease both; }
+    .brand-logo {
+      width:52px; height:52px;
+      background:linear-gradient(135deg, var(--cyan), #0099CC);
+      border-radius:12px;
+      display:flex; align-items:center; justify-content:center;
+      font-family:var(--font-data); font-size:20px; font-weight:600;
+      color:var(--bg-base);
+      margin:0 auto 14px;
+      box-shadow:0 0 30px rgba(0,212,245,.35), 0 0 60px rgba(0,212,245,.15);
+    }
+
+    /* Login card */
+    .login-card {
+      background:var(--bg-surface);
+      border:1px solid var(--border-dim);
+      border-radius:var(--radius-lg);
+      padding:36px 44px;
+      width:100%;
+      box-shadow:0 0 0 1px rgba(0,212,245,.04), var(--shadow-lg);
+      animation:fadeUp .5s .15s ease both;
+    }
+
+    .card-title {
+      font-size:10px; font-weight:700;
+      letter-spacing:2px; color:var(--text-muted);
+      text-transform:uppercase;
+      margin-bottom:28px; padding-bottom:14px;
+      border-bottom:1px solid var(--border-dim);
+    }
+
+    /* Alerts */
+    .alert {
+      border-radius:var(--radius-sm);
+      padding:10px 13px;
+      font-size:11px; font-weight:500;
+      margin-bottom:18px;
+      display:none; align-items:center; gap:7px;
+      line-height:1.5;
+    }
+    .alert.visible { display:flex; }
+    .alert-error { background:rgba(239,68,68,.1); border:1px solid rgba(239,68,68,.3); color:var(--red); }
+    .alert-info  { background:var(--cyan-a12);   border:1px solid rgba(0,212,245,.2); color:var(--cyan); }
+
+    /* Login button */
+    .btn-login {
+      width:100%;
+      background:var(--cyan);
+      border:none; border-radius:var(--radius-sm);
+      padding:12px;
+      font-family:var(--font-brand);
+      font-size:20px; letter-spacing:3px;
+      color:var(--bg-base);
+      cursor:pointer;
+      transition:all var(--ease-normal);
+      margin-top:6px;
+    }
+    .btn-login:hover:not(:disabled) { background:#33EEFF; box-shadow:0 0 20px rgba(0,212,245,.3); transform:translateY(-1px); }
+    .btn-login:disabled { opacity:.6; cursor:not-allowed; transform:none; }
+
+    .login-footer {
+      margin-top:20px;
+      font-size:10px; color:var(--text-muted);
+      letter-spacing:1px; text-align:center;
+      animation:fadeUp .5s .3s ease both;
+    }
+    .login-footer span { color:var(--text-tertiary); font-weight:600; }
+
+    @keyframes spin-sm { to { transform:rotate(360deg); } }
+    .spinner-sm {
+      display:inline-block; width:13px; height:13px;
+      border:2px solid rgba(6,10,18,.3);
+      border-top:2px solid var(--bg-base);
+      border-radius:50%;
+      animation:spin-sm .8s linear infinite;
+      vertical-align:middle; margin-right:7px;
+    }
+  </style>
 </head>
 <body>
-<div class="orb orb-1"></div>
-<div class="orb orb-2"></div>
-<div class="page">
-  <div class="brand">
-    <div class="brand-logo">CT</div>
-    <div class="brand-title">CHANN THIV SETTLEMENT</div>
-    <div class="brand-sub">INTERBANK FILE DISPATCHER · FIXED-WIDTH PARSER</div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <div class="page-content">
+    <div class="brand">
+      <div class="brand-logo">CT</div>
+      <div class="app-title">CHANN THIV SETTLEMENT</div>
+      <div class="app-subtitle">Interbank File Dispatcher · Fixed-Width Parser</div>
+    </div>
+
+    <div class="login-card">
+      <div class="card-title">Operator Login</div>
+
+      <div class="alert alert-info" id="alert-info">
+        <span>ℹ</span>
+        <span id="info-msg">Initializing database connection...</span>
+      </div>
+      <div class="alert alert-error" id="alert-error">
+        <span>⚠</span>
+        <span id="err-msg">Invalid credentials.</span>
+      </div>
+
+      <div class="fg">
+        <label class="field-label" for="inp-username">Username</label>
+        <input class="field-input" type="text" id="inp-username"
+          placeholder="Enter username"
+          autocomplete="username" autocapitalize="none"/>
+      </div>
+
+      <div class="fg">
+        <label class="field-label" for="inp-password">Password</label>
+        <div class="pw-wrap">
+          <input class="field-input" type="password" id="inp-password"
+            placeholder="Enter password"
+            autocomplete="current-password"/>
+          <button class="pw-toggle" type="button"
+            onclick="togglePwVisible('inp-password', this)">Show</button>
+        </div>
+      </div>
+
+      <button class="btn-login" id="btn-login" onclick="doLogin()">Sign In</button>
+    </div>
+
+    <div class="login-footer">
+      Default: <span>admin</span> / <span>Admin@1234</span>
+      &nbsp;·&nbsp; Change after first login
+    </div>
   </div>
-  <div class="card">
-    <div class="card-title">OPERATOR LOGIN</div>
-    <div class="alert alert-info" id="alert-info"><span>ℹ</span><span id="info-msg">Initializing database connection...</span></div>
-    <div class="alert alert-error" id="alert-error"><span>⚠</span><span id="err-msg">Invalid credentials.</span></div>
-    <div class="fg"><label class="fl" for="inp-u">USERNAME</label><input class="fc" type="text" id="inp-u" placeholder="Enter username" autocomplete="username" autocapitalize="none"/></div>
-    <div class="fg"><label class="fl" for="inp-p">PASSWORD</label><div class="pw-w"><input class="fc" type="password" id="inp-p" placeholder="Enter password" autocomplete="current-password" style="padding-right:60px"/><button class="pw-t" type="button" onclick="tpw()">SHOW</button></div></div>
-    <button class="btn-login" id="btn-login" onclick="doLogin()">SIGN IN</button>
-  </div>
-  <div class="footer">DEFAULT: <span>admin</span> / <span>Admin@1234</span> &nbsp;·&nbsp; Change after first login</div>
-</div>
-<script src="./js/auth.js"></script>
-<script>
-// Redirect if already logged in
-if (Auth.isLoggedIn()) window.location.href = './system.html';
 
-// Seed default admin if needed (async, non-blocking)
-(async function() {
-  if (!Auth.isConfigured()) {
-    showInfo('DB not configured — edit js/auth.js with your Supabase credentials');
-    return;
-  }
-  hideInfo();
-  await Auth.seedDefaultAdmin();
-})();
+  <div id="toast"></div>
 
-document.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+  <script src="./js/auth.js"></script>
+  <script src="./js/utils.js"></script>
+  <script>
+    // Already logged in → go to system
+    if (Auth.isLoggedIn()) window.location.href = './system.html';
 
-function tpw() {
-  const f = document.getElementById('inp-p'), b = document.querySelector('.pw-t');
-  f.type = f.type === 'password' ? 'text' : 'password';
-  b.textContent = f.type === 'password' ? 'SHOW' : 'HIDE';
-}
-function showError(msg) { document.getElementById('err-msg').textContent=msg; document.getElementById('alert-error').classList.add('show'); }
-function hideError()    { document.getElementById('alert-error').classList.remove('show'); }
-function showInfo(msg)  { document.getElementById('info-msg').textContent=msg; document.getElementById('alert-info').classList.add('show'); }
-function hideInfo()     { document.getElementById('alert-info').classList.remove('show'); }
+    // Seed default admin (non-blocking)
+    (async function init() {
+      if (!Auth.isConfigured()) {
+        _showInfo('DB not configured — edit js/auth.js with your Supabase credentials');
+        return;
+      }
+      _hideInfo();
+      await Auth.seedDefaultAdmin();
+    })();
 
-async function doLogin() {
-  hideError();
-  const u = document.getElementById('inp-u').value.trim();
-  const p = document.getElementById('inp-p').value;
-  const btn = document.getElementById('btn-login');
-  if (!u || !p) { showError('Username and password are required.'); return; }
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>AUTHENTICATING...';
-  await new Promise(r => setTimeout(r, 400));
-  const result = await Auth.login(u, p);
-  if (result.ok) {
-    btn.innerHTML = '✓ ACCESS GRANTED';
-    btn.style.background = '#69FF47';
-    await new Promise(r => setTimeout(r, 500));
-    window.location.href = 'system.html';
-  } else {
-    btn.disabled = false;
-    btn.innerHTML = 'SIGN IN';
-    showError(result.error);
-    document.getElementById('inp-p').value = '';
-    document.getElementById('inp-p').focus();
-  }
-}
-</script>
+    document.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+    function _showInfo(msg) {
+      document.getElementById('info-msg').textContent = msg;
+      document.getElementById('alert-info').classList.add('visible');
+    }
+    function _hideInfo() {
+      document.getElementById('alert-info').classList.remove('visible');
+    }
+    function _showError(msg) {
+      document.getElementById('err-msg').textContent = msg;
+      document.getElementById('alert-error').classList.add('visible');
+    }
+    function _hideError() {
+      document.getElementById('alert-error').classList.remove('visible');
+    }
+
+    async function doLogin() {
+      _hideError();
+      const u   = document.getElementById('inp-username').value.trim();
+      const p   = document.getElementById('inp-password').value;
+      const btn = document.getElementById('btn-login');
+
+      if (!u || !p) { _showError('Username and password are required.'); return; }
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-sm"></span>Authenticating...';
+
+      await new Promise(r => setTimeout(r, 400));
+      const result = await Auth.login(u, p);
+
+      if (result.ok) {
+        btn.innerHTML = '✓ Access Granted';
+        btn.style.background = 'var(--green)';
+        await new Promise(r => setTimeout(r, 500));
+        window.location.href = './system.html';
+      } else {
+        btn.disabled = false;
+        btn.innerHTML = 'Sign In';
+        _showError(result.error);
+        document.getElementById('inp-password').value = '';
+        document.getElementById('inp-password').focus();
+      }
+    }
+  </script>
 </body>
 </html>
