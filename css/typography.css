@@ -1,0 +1,1030 @@
+/* ═══════════════════════════════════════════════════════════════════
+   CHANN THIV SETTLEMENT SYSTEM — TYPOGRAPHY UPGRADE
+   css/typography.css  |  v1.0
+
+   Load this LAST in every HTML file, after all other stylesheets:
+     <link rel="stylesheet" href="./css/style.css"/>
+     <link rel="stylesheet" href="./css/db.css"/>
+     <link rel="stylesheet" href="./css/typography.css"/>   ← add this
+
+   Covers every page:
+     login.html · index.html · system.html · user-management.html
+
+   Design goals:
+     - Inter for UI prose, labels, body text (superior readability)
+     - IBM Plex Mono kept for financial data: amounts, codes, PANs,
+       timestamps, table cell values, inputs (tabular-nums aligned)
+     - Bebas Neue kept for page titles and brand headings only
+     - font-variant-numeric: tabular-nums on all amount / date fields
+     - Clear 6-level hierarchy with consistent weight / size / spacing
+     - Reduced eye strain: generous line-height, relaxed letter-spacing
+     - Accessible contrast: all text passes WCAG AA on dark backgrounds
+═══════════════════════════════════════════════════════════════════ */
+
+
+/* ─── 1. FONT IMPORT ─────────────────────────────────────────────
+   Inter: UI labels, nav, body, modals, buttons, descriptions
+   IBM Plex Mono: data cells, amounts, codes, inputs (already loaded)
+   Bebas Neue: brand title, page titles (already loaded)
+   Fallbacks: system-ui → Segoe UI → Arial → sans-serif
+─────────────────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+
+/* ─── 2. CSS CUSTOM PROPERTIES ───────────────────────────────────
+   Centralised tokens — change one value, update everywhere.
+─────────────────────────────────────────────────────────────────── */
+:root {
+  /* Font families */
+  --font-ui   : 'Inter', system-ui, 'Segoe UI', Arial, sans-serif;
+  --font-data : 'IBM Plex Mono', 'Courier New', monospace;
+  --font-brand: 'Bebas Neue', 'Arial Narrow', Arial, sans-serif;
+
+  /* Type scale — 6-level hierarchy */
+  --text-2xs  : 10px;   /* micro labels, status chips, tooltips      */
+  --text-xs   : 11px;   /* table cell content, helper text           */
+  --text-sm   : 12px;   /* secondary body, form hints                */
+  --text-base : 13px;   /* primary body, nav items, buttons          */
+  --text-md   : 15px;   /* section sub-headers                       */
+  --text-lg   : 18px;   /* modal titles, card headings               */
+  --text-xl   : 22px;   /* page sub-headers (non-brand)              */
+  --text-2xl  : 28px;   /* page titles (Bebas Neue)                  */
+  --text-3xl  : 36px;   /* dashboard KPI numbers (Bebas Neue)        */
+
+  /* Font weights */
+  --fw-normal  : 400;
+  --fw-medium  : 500;
+  --fw-semibold: 600;
+  --fw-bold    : 700;
+
+  /* Line heights */
+  --lh-tight   : 1.3;   /* headings, single-line labels              */
+  --lh-snug    : 1.5;   /* nav items, compact lists                  */
+  --lh-normal  : 1.65;  /* body text, descriptions                   */
+  --lh-relaxed : 1.8;   /* long-form content, help text              */
+
+  /* Letter spacing */
+  --ls-tighter : -0.3px; /* large numerics — tighter for density     */
+  --ls-tight   :  0px;   /* body, data cells — no extra spacing      */
+  --ls-normal  :  0.2px; /* nav labels, buttons                      */
+  --ls-wide    :  0.6px; /* section headers, metadata                */
+  --ls-wider   :  1.2px; /* ALLCAPS badges, chips, tiny labels       */
+  --ls-widest  :  2px;   /* brand subtitles, category titles         */
+
+  /* Text colours (dark theme) */
+  --clr-primary   : #E2E8F0;  /* headings, important data             */
+  --clr-secondary : #94A3B8;  /* body text, most table cells          */
+  --clr-tertiary  : #64748B;  /* helper text, placeholders            */
+  --clr-muted     : #475569;  /* disabled, de-emphasised              */
+  --clr-ghost     : #334155;  /* very dim labels, divider text        */
+  --clr-dim       : #1E3A5F;  /* near-invisible structural elements   */
+
+  /* Accent colours (unchanged from design system) */
+  --clr-cyan  : #00E5FF;
+  --clr-green : #69FF47;
+  --clr-gold  : #FFD700;
+  --clr-red   : #FF4757;
+  --clr-purple: #A855F7;
+  --clr-orange: #FF6B35;
+}
+
+
+/* ─── 3. BASE RESET — switch body to Inter ───────────────────────
+   IBM Plex Mono becomes opt-in for data elements only.
+─────────────────────────────────────────────────────────────────── */
+html, body {
+  font-family : var(--font-ui) !important;
+  font-size   : var(--text-base);
+  font-weight : var(--fw-normal);
+  line-height : var(--lh-normal);
+  color       : var(--clr-secondary);
+  -webkit-font-smoothing : antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering         : optimizeLegibility;
+}
+
+
+/* ─── 4. BRAND / PAGE TITLES — Bebas Neue ────────────────────────
+   Kept intentionally — strong visual identity for the brand.
+─────────────────────────────────────────────────────────────────── */
+
+/* App name in header */
+#app-title,
+.brand-title {
+  font-family   : var(--font-brand) !important;
+  font-size     : 22px !important;
+  letter-spacing: 3.5px !important;
+  color         : var(--clr-primary) !important;
+  line-height   : var(--lh-tight) !important;
+}
+
+/* App subtitle in header */
+#app-sub,
+.brand-sub {
+  font-family   : var(--font-ui) !important;
+  font-size     : var(--text-2xs) !important;
+  font-weight   : var(--fw-medium) !important;
+  letter-spacing: var(--ls-widest) !important;
+  color         : var(--clr-ghost) !important;
+  text-transform: uppercase;
+  line-height   : 1 !important;
+}
+
+/* Page panel headings: DASHBOARD, USER LIST, etc. */
+.ph-title,
+.page-title,
+.ph h1 {
+  font-family   : var(--font-brand) !important;
+  font-size     : var(--text-2xl) !important;
+  letter-spacing: 3px !important;
+  color         : var(--clr-primary) !important;
+  line-height   : var(--lh-tight) !important;
+}
+
+/* Page sub-heading below ph-title */
+.ph-sub,
+.page-sub {
+  font-family   : var(--font-ui) !important;
+  font-size     : var(--text-2xs) !important;
+  font-weight   : var(--fw-medium) !important;
+  letter-spacing: var(--ls-widest) !important;
+  color         : var(--clr-ghost) !important;
+  text-transform: uppercase;
+  margin-top    : 4px !important;
+  line-height   : 1 !important;
+}
+
+/* Modal titles */
+.mtitle,
+.modal h2,
+#db-modal-title,
+.m-role-title {
+  font-family   : var(--font-brand) !important;
+  font-size     : var(--text-lg) !important;
+  letter-spacing: 2.5px !important;
+  color         : var(--clr-primary) !important;
+  line-height   : var(--lh-tight) !important;
+}
+
+/* Dashboard KPI values */
+.dash-card-val,
+[id^="d-"] {
+  font-family   : var(--font-brand) !important;
+  font-size     : var(--text-3xl) !important;
+  letter-spacing: var(--ls-tighter) !important;
+  color         : var(--clr-primary) !important;
+  line-height   : 1 !important;
+  font-variant-numeric: tabular-nums;
+}
+
+
+/* ─── 5. SECTION / CATEGORY HEADERS — Inter semibold ────────────
+─────────────────────────────────────────────────────────────────── */
+
+/* Sidebar section labels: SETTLEMENT, ADMIN, PROJECT */
+.nav-section,
+.nav-group-label {
+  font-family   : var(--font-ui) !important;
+  font-size     : 9px !important;
+  font-weight   : var(--fw-bold) !important;
+  letter-spacing: var(--ls-widest) !important;
+  color         : var(--clr-dim) !important;
+  text-transform: uppercase;
+  line-height   : 1 !important;
+}
+
+/* Sidebar dropdown parent labels */
+.dd-lbl {
+  font-family   : var(--font-ui) !important;
+  font-size     : var(--text-2xs) !important;
+  font-weight   : var(--fw-semibold) !important;
+  letter-spacing: var(--ls-normal) !important;
+  line-height   : var(--lh-tight) !important;
+}
+
+/* Dashboard card labels */
+.dash-card-label {
+  font-family   : var(--font-ui) !important;
+  font-size     : 9px !important;
+  font-weight   : var(--fw-semibold) !important;
+  letter-spacing: var(--ls-widest) !important;
+  color         : var(--clr-ghost) !important;
+  text-transform: uppercase;
+  line-height   : 1 !important;
+}
+
+/* Dashboard card sub-text */
+.dash-card-sub {
+  font-family   : var(--font-ui) !important;
+  font-size     : var(--text-2xs) !important;
+  font-weight   : var(--fw-normal) !important;
+  color         : var(--clr-muted) !important;
+  letter-spacing: 0.1px !important;
+  line-height   : var(--lh-snug) !important;
+}
+
+/* Dashboard panel title */
+.dash-recent-title {
+  font-family   : var(--font-ui) !important;
+  font-size     : var(--text-2xs) !important;
+  font-weight   : var(--fw-semibold) !important;
+  letter-spacing: var(--ls-widest) !important;
+  color         : var(--clr-muted) !important;
+  text-transform: uppercase;
+}
+
+/* DB history panel title */
+#db-history-title {
+  font-family   : var(--font-ui) !important;
+  font-size     : 9px !important;
+  font-weight   : var(--fw-semibold) !important;
+  letter-spacing: var(--ls-widest) !important;
+  color         : var(--clr-ghost) !important;
+  text-transform: uppercase;
+}
+
+/* Toolbar format legend sidebar title */
+#sidebar-title {
+  font-family   : var(--font-ui) !important;
+  font-size     : 9px !important;
+  font-weight   : var(--fw-bold) !important;
+  letter-spacing: var(--ls-widest) !important;
+  color         : var(--clr-dim) !important;
+  text-transform: uppercase;
+}
+
+
+/* ─── 6. NAVIGATION ITEMS — Inter medium ─────────────────────────
+─────────────────────────────────────────────────────────────────── */
+
+.ni-text, /* generic nav text wrapper */
+.nav-item,
+.ni {
+  font-family   : var(--font-ui) !important;
+  font-size     : var(--text-xs) !important;
+  font-weight   : var(--fw-medium) !important;
+  letter-spacing: var(--ls-normal) !important;
+  line-height   : var(--lh-snug) !important;
+}
+
+/* Sidebar nav items in system.html */
+.ni[onclick] {
+  font-family   : var(--font-ui) !important;
+  font-size     : var(--text-xs) !important;
+  font-weight   : var(--fw-medium) !important;
+  letter-spacing: var(--ls-normal) !important;
+}
+
+/* User name in sidebar profile */
+#sb-name,
+#sidebar-user-name {
+  font-family   : var(--font-ui) !important;
+  font-size     : var(--text-xs) !important;
+  font-weight   : var(--fw-semibold) !important;
+  color         : var(--clr-secondary) !important;
+  letter-spacing: 0.1px !important;
+}
+
+/* User role in sidebar profile */
+#sb-role,
+#sidebar-user-role {
+  font-family   : var(--font-ui) !important;
+  font-size     : 9px !important;
+  font-weight   : var(--fw-medium) !important;
+  letter-spacing: var(--ls-wider) !important;
+  color         : var(--clr-ghost) !important;
+  text-transform: uppercase;
+}
+
+/* Taskbar tab labels */
+.tb-tab,
+.tb-tab-label {
+  font-family   : var(--font-ui) !important;
+  font-size     : var(--text-xs) !important;
+  font-weight   : var(--fw-medium) !important;
+  letter-spacing: var(--ls-normal) !important;
+}
+
+.tb-tab.active .tb-tab-label {
+  font-weight: var(--fw-semibold) !important;
+  color      : var(--clr-primary) !important;
+}
+
+
+/* ─── 7. TABLE HEADERS — Inter semibold, tabular ─────────────────
+   Critical for financial data scanning.
+─────────────────────────────────────────────────────────────────── */
+
+th {
+  font-family        : var(--font-ui) !important;
+  font-size          : 10px !important;
+  font-weight        : var(--fw-semibold) !important;
+  letter-spacing     : var(--ls-wider) !important;
+  text-transform     : uppercase;
+  color              : rgba(255, 215, 0, 0.75) !important;
+  line-height        : var(--lh-tight) !important;
+  padding            : 11px 16px !important;
+  white-space        : nowrap;
+}
+
+/* Number / row index column headers */
+th.num-col,
+th:first-child[style*="1E3A5F"],
+th:first-child[style*="center"] {
+  font-family   : var(--font-data) !important;
+  font-size     : 9px !important;
+  font-weight   : var(--fw-normal) !important;
+  color         : var(--clr-dim) !important;
+  letter-spacing: 0 !important;
+}
+
+
+/* ─── 8. TABLE CELL CONTENT — IBM Plex Mono, tabular-nums ────────
+   Financial data MUST stay monospaced for column alignment.
+─────────────────────────────────────────────────────────────────── */
+
+td {
+  font-family        : var(--font-data) !important;
+  font-size          : var(--text-xs) !important;
+  font-weight        : var(--fw-normal) !important;
+  letter-spacing     : 0 !important;
+  color              : var(--clr-secondary) !important;
+  line-height        : var(--lh-snug) !important;
+  padding            : 10px 16px !important;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Bold / important cell content */
+td.td-bold,
+.td-bold {
+  font-weight: var(--fw-medium) !important;
+  color      : var(--clr-primary) !important;
+}
+
+/* Row number cells */
+td.num-td,
+td:first-child[style*="9px"] {
+  font-family   : var(--font-data) !important;
+  font-size     : 9px !important;
+  font-weight   : var(--fw-normal) !important;
+  color         : var(--clr-dim) !important;
+  letter-spacing: 0 !important;
+}
+
+/* PAN masked values — gold tint, monospaced */
+td.pan-td,
+.pan-td {
+  font-family        : var(--font-data) !important;
+  font-size          : var(--text-xs) !important;
+  color              : rgba(255, 215, 0, 0.55) !important;
+  letter-spacing     : 0.5px !important;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Empty / dash cells */
+td.empty-td,
+.empty-td td {
+  font-family   : var(--font-ui) !important;
+  font-size     : var(--text-xs) !important;
+  font-style    : italic;
+  color         : var(--clr-dim) !important;
+  letter-spacing: var(--ls-normal) !important;
+}
+
+/* Amount columns — right-align, tabular */
+td[data-col="amount"],
+td[data-type="amount"],
+.col-amount {
+  text-align         : right !important;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  letter-spacing     : 0 !important;
+}
+
+/* Date / timestamp columns */
+td[data-col="date"],
+td[data-col="timestamp"],
+.col-date {
+  font-size          : var(--text-xs) !important;
+  color              : var(--clr-tertiary) !important;
+  font-variant-numeric: tabular-nums;
+  white-space        : nowrap !important;
+}
+
+/* Hover row background — keep text readable */
+tbody tr:hover td {
+  color: var(--clr-primary) !important;
+}
+
+
+/* ─── 9. ROLE & STATUS BADGES — Inter medium ─────────────────────
+─────────────────────────────────────────────────────────────────── */
+
+.rb,
+.hbadge,
+.badge,
+.dz-tag,
+.chip,
+.dh-status,
+.sb-on,
+.sb-off {
+  font-family   : var(--font-ui) !important;
+  font-size     : 10px !important;
+  font-weight   : var(--fw-medium) !important;
+  letter-spacing: var(--ls-wider) !important;
+  line-height   : 1 !important;
+}
+
+/* System-ready / DB online badges in header */
+#badge-status,
+#badge-files,
+#badge-db,
+.badge-db-online,
+.badge-db-offline {
+  font-family   : var(--font-ui) !important;
+  font-size     : 10px !important;
+  font-weight   : var(--fw-semibold) !important;
+  letter-spacing: var(--ls-wider) !important;
+}
+
+/* DB status bottom of sidebar */
+#sb-db,
+#sidebar-db-status {
+  font-family   : var(--font-ui) !important;
+  font-size     : var(--text-2xs) !important;
+  font-weight   : var(--fw-medium) !important;
+  letter-spacing: var(--ls-wide) !important;
+  color         : var(--clr-ghost) !important;
+}
+
+/* Stat chips in toolbars: TOTAL 12, ACTIVE 9 */
+.chip,
+.stat-chip {
+  font-family   : var(--font-ui) !important;
+  font-size     : var(--text-2xs) !important;
+  font-weight   : var(--fw-medium) !important;
+  letter-spacing: var(--ls-wider) !important;
+}
+
+.chip span,
+.stat-chip span {
+  font-family        : var(--font-data) !important;
+  font-weight        : var(--fw-semibold) !important;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Active / inactive status inline */
+.sb-on,
+.sb-off {
+  font-size     : var(--text-2xs) !important;
+  letter-spacing: var(--ls-wider) !important;
+}
+
+
+/* ─── 10. BUTTONS — Inter semibold ───────────────────────────────
+─────────────────────────────────────────────────────────────────── */
+
+/* Primary action buttons */
+.btn-primary,
+.btn-login,
+.bsub,
+.btn-cyan {
+  font-family   : var(--font-ui) !important;
+  font-size     : var(--text-base) !important;
+  font-weight   : var(--fw-semibold) !important;
+  letter-spacing: var(--ls-normal) !important;
+  line-height   : var(--lh-tight) !important;
+  text-transform: uppercase;
+}
+
+/* Small action buttons: EDIT, DELETE, RESET */
+.ba,
+.btn-cancel,
+#tab-add-btn,
+.pw-t {
+  font-family   : var(--font-ui) !important;
+  font-size     : var(--text-2xs) !important;
+  font-weight   : var(--fw-semibold) !important;
+  letter-spacing: var(--ls-wider) !important;
+  text-transform: uppercase;
+}
+
+/* Sidebar upload / clear buttons */
+.btn,
+#btn-upload,
+#btn-clear,
+.btn-db {
+  font-family   : var(--font-ui) !important;
+  font-size     : var(--text-xs) !important;
+  font-weight   : var(--fw-semibold) !important;
+  letter-spacing: var(--ls-wider) !important;
+  text-transform: uppercase;
+}
+
+/* Logout / sign-out button */
+.btn-logout,
+#btn-signout {
+  font-family   : var(--font-ui) !important;
+  font-size     : var(--text-2xs) !important;
+  font-weight   : var(--fw-semibold) !important;
+  letter-spacing: var(--ls-wide) !important;
+  text-transform: uppercase;
+}
+
+/* Export / save-to-db toolbar buttons */
+#btn-export,
+#btn-save-db-toolbar,
+#btn-save-db {
+  font-family   : var(--font-ui) !important;
+  font-size     : var(--text-2xs) !important;
+  font-weight   : var(--fw-semibold) !important;
+  letter-spacing: var(--ls-wider) !important;
+  text-transform: uppercase;
+}
+
+
+/* ─── 11. FORM LABELS & INPUTS ────────────────────────────────────
+─────────────────────────────────────────────────────────────────── */
+
+/* Form field labels: USERNAME, PASSWORD, ROLE */
+.fl,
+label.fl,
+.fc-label {
+  font-family   : var(--font-ui) !important;
+  font-size     : 10px !important;
+  font-weight   : var(--fw-semibold) !important;
+  letter-spacing: var(--ls-widest) !important;
+  color         : var(--clr-muted) !important;
+  text-transform: uppercase;
+  line-height   : 1 !important;
+}
+
+/* Form field inputs — stay monospaced for data entry */
+.fc,
+input.fc,
+select.fc,
+textarea.fc,
+.sw input,
+.search-wrap input,
+#search-input,
+.filter-sel,
+.fsel {
+  font-family        : var(--font-data) !important;
+  font-size          : var(--text-base) !important;
+  font-weight        : var(--fw-normal) !important;
+  letter-spacing     : 0 !important;
+  line-height        : var(--lh-snug) !important;
+  color              : var(--clr-secondary) !important;
+  font-variant-numeric: tabular-nums;
+}
+
+input::placeholder,
+.fc::placeholder,
+#search-input::placeholder {
+  font-family   : var(--font-ui) !important;
+  font-size     : var(--text-sm) !important;
+  font-weight   : var(--fw-normal) !important;
+  font-style    : italic;
+  color         : var(--clr-dim) !important;
+  letter-spacing: 0 !important;
+}
+
+/* Form helper / error text below inputs */
+.fh,
+.fh.err,
+.fc-hint {
+  font-family   : var(--font-ui) !important;
+  font-size     : var(--text-xs) !important;
+  font-weight   : var(--fw-normal) !important;
+  letter-spacing: 0.1px !important;
+  line-height   : var(--lh-snug) !important;
+}
+
+/* Required asterisk */
+.req { color: var(--clr-red) !important; }
+
+/* Password toggle SHOW/HIDE */
+.pw-t {
+  font-family   : var(--font-ui) !important;
+  font-size     : 10px !important;
+  font-weight   : var(--fw-semibold) !important;
+  letter-spacing: var(--ls-wider) !important;
+}
+
+/* Strength bars label area */
+.pw-bars + * {
+  font-family: var(--font-ui) !important;
+  font-size  : 10px !important;
+}
+
+
+/* ─── 12. MODAL BODY TEXT ─────────────────────────────────────────
+─────────────────────────────────────────────────────────────────── */
+
+.cb,
+.modal p,
+.modal-body {
+  font-family  : var(--font-ui) !important;
+  font-size    : var(--text-sm) !important;
+  font-weight  : var(--fw-normal) !important;
+  line-height  : var(--lh-relaxed) !important;
+  color        : var(--clr-secondary) !important;
+  letter-spacing: 0.1px !important;
+}
+
+.cb strong,
+.modal strong {
+  font-weight: var(--fw-semibold) !important;
+  color      : var(--clr-primary) !important;
+}
+
+/* Warning text block inside modals */
+.cw {
+  font-family   : var(--font-ui) !important;
+  font-size     : var(--text-xs) !important;
+  font-weight   : var(--fw-medium) !important;
+  letter-spacing: var(--ls-normal) !important;
+  line-height   : var(--lh-normal) !important;
+}
+
+/* Modal sub-title */
+#db-modal-sub,
+.modal-sub {
+  font-family   : var(--font-ui) !important;
+  font-size     : var(--text-xs) !important;
+  font-weight   : var(--fw-normal) !important;
+  color         : var(--clr-ghost) !important;
+  letter-spacing: var(--ls-wide) !important;
+}
+
+/* Temporary password display */
+.tmp-pw {
+  font-family        : var(--font-data) !important;
+  font-size          : 17px !important;
+  font-weight        : var(--fw-bold) !important;
+  letter-spacing     : 2px !important;
+  font-variant-numeric: tabular-nums;
+}
+
+
+/* ─── 13. SIDEBAR HISTORY PANEL ──────────────────────────────────
+─────────────────────────────────────────────────────────────────── */
+
+.dh-name {
+  font-family   : var(--font-data) !important;
+  font-size     : var(--text-xs) !important;
+  font-weight   : var(--fw-medium) !important;
+  color         : var(--clr-secondary) !important;
+  letter-spacing: 0 !important;
+}
+
+.dh-meta {
+  font-family        : var(--font-data) !important;
+  font-size          : 9px !important;
+  font-weight        : var(--fw-normal) !important;
+  color              : var(--clr-ghost) !important;
+  font-variant-numeric: tabular-nums;
+}
+
+.dh-date {
+  font-family        : var(--font-data) !important;
+  font-size          : 9px !important;
+  color              : var(--clr-dim) !important;
+  font-variant-numeric: tabular-nums;
+}
+
+.dh-status {
+  font-family   : var(--font-ui) !important;
+  font-size     : 9px !important;
+  font-weight   : var(--fw-semibold) !important;
+  letter-spacing: var(--ls-wider) !important;
+  text-transform: uppercase;
+}
+
+.db-history-empty {
+  font-family   : var(--font-ui) !important;
+  font-size     : var(--text-xs) !important;
+  font-weight   : var(--fw-normal) !important;
+  font-style    : italic;
+  color         : var(--clr-dim) !important;
+}
+
+
+/* ─── 14. DROP ZONE ───────────────────────────────────────────────
+─────────────────────────────────────────────────────────────────── */
+
+#dz-title {
+  font-family   : var(--font-brand) !important;
+  font-size     : 28px !important;
+  letter-spacing: 4px !important;
+  color         : var(--clr-primary) !important;
+  line-height   : var(--lh-tight) !important;
+}
+
+#dz-sub {
+  font-family   : var(--font-ui) !important;
+  font-size     : var(--text-xs) !important;
+  font-weight   : var(--fw-normal) !important;
+  color         : var(--clr-muted) !important;
+  line-height   : var(--lh-relaxed) !important;
+  letter-spacing: 0.1px !important;
+}
+
+.dz-tag {
+  font-family   : var(--font-data) !important;
+  font-size     : var(--text-2xs) !important;
+  font-weight   : var(--fw-medium) !important;
+  letter-spacing: 0.5px !important;
+}
+
+
+/* ─── 15. LOADING & PROGRESS ─────────────────────────────────────
+─────────────────────────────────────────────────────────────────── */
+
+#loading-text,
+.tbl-loading {
+  font-family   : var(--font-ui) !important;
+  font-size     : var(--text-sm) !important;
+  font-weight   : var(--fw-semibold) !important;
+  letter-spacing: var(--ls-widest) !important;
+  text-transform: uppercase;
+}
+
+#db-save-label {
+  font-family   : var(--font-ui) !important;
+  font-size     : 10px !important;
+  font-weight   : var(--fw-semibold) !important;
+  letter-spacing: var(--ls-wider) !important;
+  text-transform: uppercase;
+}
+
+
+/* ─── 16. TOAST NOTIFICATION ─────────────────────────────────────
+─────────────────────────────────────────────────────────────────── */
+
+#toast {
+  font-family   : var(--font-ui) !important;
+  font-size     : var(--text-sm) !important;
+  font-weight   : var(--fw-semibold) !important;
+  letter-spacing: var(--ls-normal) !important;
+  line-height   : var(--lh-tight) !important;
+}
+
+
+/* ─── 17. LOGIN PAGE ─────────────────────────────────────────────
+─────────────────────────────────────────────────────────────────── */
+
+.card-title {
+  font-family   : var(--font-ui) !important;
+  font-size     : var(--text-xs) !important;
+  font-weight   : var(--fw-semibold) !important;
+  letter-spacing: var(--ls-widest) !important;
+  color         : var(--clr-muted) !important;
+  text-transform: uppercase;
+  line-height   : 1 !important;
+}
+
+.alert,
+.alert-error,
+.alert-info {
+  font-family   : var(--font-ui) !important;
+  font-size     : var(--text-xs) !important;
+  font-weight   : var(--fw-medium) !important;
+  letter-spacing: 0.1px !important;
+  line-height   : var(--lh-snug) !important;
+}
+
+.footer {
+  font-family   : var(--font-ui) !important;
+  font-size     : var(--text-2xs) !important;
+  font-weight   : var(--fw-normal) !important;
+  letter-spacing: var(--ls-wide) !important;
+  color         : var(--clr-dim) !important;
+  line-height   : var(--lh-normal) !important;
+}
+
+.footer span {
+  font-weight: var(--fw-semibold) !important;
+  color      : var(--clr-ghost) !important;
+}
+
+
+/* ─── 18. FORMAT LEGEND SIDEBAR (index.html) ─────────────────────
+─────────────────────────────────────────────────────────────────── */
+
+.legend-label {
+  font-family   : var(--font-ui) !important;
+  font-size     : var(--text-xs) !important;
+  font-weight   : var(--fw-medium) !important;
+  letter-spacing: var(--ls-normal) !important;
+}
+
+.legend-sub {
+  font-family   : var(--font-ui) !important;
+  font-size     : 8px !important;
+  font-weight   : var(--fw-normal) !important;
+  letter-spacing: var(--ls-wide) !important;
+  text-transform: uppercase;
+}
+
+
+/* ─── 19. STATUS BAR (index.html bottom) ─────────────────────────
+─────────────────────────────────────────────────────────────────── */
+
+#status-left,
+#status-right {
+  font-family   : var(--font-ui) !important;
+  font-size     : 9px !important;
+  font-weight   : var(--fw-medium) !important;
+  letter-spacing: var(--ls-widest) !important;
+  text-transform: uppercase;
+  color         : var(--clr-dim) !important;
+}
+
+.status-file-item {
+  font-family        : var(--font-data) !important;
+  font-size          : 9px !important;
+  font-variant-numeric: tabular-nums;
+}
+
+
+/* ─── 20. TAB BAR (index.html) ───────────────────────────────────
+─────────────────────────────────────────────────────────────────── */
+
+.tab-name {
+  font-family   : var(--font-data) !important;
+  font-size     : var(--text-2xs) !important;
+  font-weight   : var(--fw-normal) !important;
+  letter-spacing: 0 !important;
+}
+
+.tab.active .tab-name {
+  font-weight: var(--fw-semibold) !important;
+  color      : inherit !important;
+}
+
+.tab-count {
+  font-family        : var(--font-data) !important;
+  font-size          : 9px !important;
+  font-variant-numeric: tabular-nums;
+}
+
+
+/* ─── 21. FORMAT BADGE + STATS BAR (index.html toolbar) ──────────
+─────────────────────────────────────────────────────────────────── */
+
+#format-badge {
+  font-family   : var(--font-ui) !important;
+  font-size     : var(--text-2xs) !important;
+  font-weight   : var(--fw-semibold) !important;
+  letter-spacing: var(--ls-wider) !important;
+  text-transform: uppercase;
+}
+
+.stat-label {
+  font-family   : var(--font-ui) !important;
+  font-size     : var(--text-2xs) !important;
+  font-weight   : var(--fw-medium) !important;
+  letter-spacing: var(--ls-wider) !important;
+  color         : var(--clr-ghost) !important;
+  text-transform: uppercase;
+}
+
+.stat-val {
+  font-family        : var(--font-data) !important;
+  font-size          : var(--text-2xs) !important;
+  font-weight        : var(--fw-semibold) !important;
+  color              : var(--clr-secondary) !important;
+  font-variant-numeric: tabular-nums;
+}
+
+#filter-note {
+  font-family   : var(--font-ui) !important;
+  font-size     : 9px !important;
+  font-weight   : var(--fw-medium) !important;
+  letter-spacing: var(--ls-normal) !important;
+}
+
+
+/* ─── 22. DB MODAL (index.html) ──────────────────────────────────
+─────────────────────────────────────────────────────────────────── */
+
+.db-modal-field label {
+  font-family   : var(--font-ui) !important;
+  font-size     : 9px !important;
+  font-weight   : var(--fw-semibold) !important;
+  letter-spacing: var(--ls-widest) !important;
+  color         : var(--clr-ghost) !important;
+  text-transform: uppercase;
+}
+
+.db-modal-field code {
+  font-family        : var(--font-data) !important;
+  font-size          : var(--text-xs) !important;
+  font-weight        : var(--fw-normal) !important;
+  color              : var(--clr-cyan) !important;
+  letter-spacing     : 0 !important;
+  font-variant-numeric: tabular-nums;
+}
+
+.db-modal-hint {
+  font-family   : var(--font-ui) !important;
+  font-size     : var(--text-xs) !important;
+  font-weight   : var(--fw-normal) !important;
+  line-height   : var(--lh-relaxed) !important;
+  color         : var(--clr-muted) !important;
+  letter-spacing: 0.1px !important;
+}
+
+
+/* ─── 23. TABULAR NUMBERS GLOBAL ENFORCEMENT ─────────────────────
+   Any element that holds financial data should auto-align digits.
+─────────────────────────────────────────────────────────────────── */
+
+/* Amounts, counts, row numbers, timestamps */
+[class*="amount"],
+[class*="count"],
+[class*="num"],
+[class*="stat-val"],
+[class*="dash-card-val"],
+[id*="stat-"],
+[id*="d-users"],
+[id*="d-files"],
+[id*="d-txns"],
+[id*="d-roles"] {
+  font-variant-numeric : tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+
+/* ─── 24. GLOBAL UTILITY OVERRIDES ──────────────────────────────
+   Ensure any inline font-family that slipped through uses Inter
+   for UI text and IBM Plex Mono for data text.
+─────────────────────────────────────────────────────────────────── */
+
+/* Anything with inline style font-family that's a UI element */
+.ph *, .toolbar *, .mbd *, .dash-card *:not(.dash-card-val) {
+  /* Let the specific rules above win; this acts as safety fallback */
+}
+
+/* All remaining text not matched above defaults to Inter */
+p, span, div, li, a, label, small, cite {
+  font-family: var(--font-ui);
+}
+
+/* But data elements always stay monospaced */
+code, pre, kbd, samp,
+td, th,
+.fc, input, select, textarea {
+  font-family: var(--font-data) !important;
+}
+
+/* Except th which we specifically set to Inter above */
+th {
+  font-family: var(--font-ui) !important;
+}
+
+
+/* ─── 25. IMPROVED SPACING OVERRIDES ─────────────────────────────
+   Improve vertical rhythm for data-heavy modules.
+─────────────────────────────────────────────────────────────────── */
+
+/* More breathing room in table rows */
+tbody tr td {
+  padding-top   : 10px !important;
+  padding-bottom: 10px !important;
+}
+
+/* Slightly tighter for the compact data table in index.html */
+#data-table td {
+  padding-top   : 8px !important;
+  padding-bottom: 8px !important;
+  line-height   : var(--lh-tight) !important;
+}
+
+/* Modal form rows */
+.fg {
+  margin-bottom: 18px !important;
+}
+
+/* Toolbar spacing */
+.toolbar,
+.sw,
+.search-wrap {
+  gap: 10px !important;
+}
+
+/* Card padding */
+.dash-card {
+  padding: 20px 22px !important;
+}
+
+
+/* ─── 26. SCROLL BAR — subtle refinement ─────────────────────────
+─────────────────────────────────────────────────────────────────── */
+
+::-webkit-scrollbar       { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: #070B14; }
+::-webkit-scrollbar-thumb { background: #1E3A5F; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(0,229,255,0.25); }
+
