@@ -12,7 +12,7 @@
 ═══════════════════════════════════════════════════════════════════ */
 
 const AUTH_SUPABASE_URL      = 'https://zsmtqxexroyxhgcknnbi.supabase.co';
-const AUTH_SUPABASE_ANON_KEY = 'sb_publishable_u3k5r8xCtireQeps4DsgRg_JgUg_LTk';
+const AUTH_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpzbXRxeGV4cm95eGhnY2tubmJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0NzgxMzMsImV4cCI6MjA4OTA1NDEzM30.rjmD14CyEbc_ECXGDfmI4hfJb_vCXadxiUeeg9icElU';
 const SESSION_KEY = 'ct_session_v2';
 
 async function _af(path, opts = {}) {
