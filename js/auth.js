@@ -48,7 +48,10 @@ async function _fetch(path, opts = {}) {
     }
   });
   if (res.status === 204) return null;
-  const data = await res.json();
+  const text = await res.text();
+  if (!text || !text.trim()) return null;
+  let data;
+  try { data = JSON.parse(text); } catch(e) { if (!res.ok) throw new Error('HTTP ' + res.status); return null; }
   if (!res.ok) throw new Error(data?.message || data?.error || 'HTTP ' + res.status);
   return data;
 }
@@ -167,7 +170,7 @@ const Auth = {
     try {
       if (!this.isConfigured()) return;
       const admins = await _fetch('/rest/v1/app_users?role=eq.admin&limit=1&select=id');
-      if (admins && admins.length > 0) return; // Already exists
+      if (admins && admins.length > 0) return;
       await this.createUser({
         username  : 'admin',
         fullName  : 'System Administrator',
