@@ -192,7 +192,7 @@
 /* Nav dropdown */
 .dd-header {
   display: flex; align-items: center; gap: var(--space-2);
-  padding: var(--space-2) var(--space-4);
+  padding: 7px var(--space-4);   /* ← match nav-item top/bottom padding */
   cursor: pointer;
   user-select: none;
   transition: background var(--ease-fast);
@@ -233,7 +233,7 @@
 /* Nav items */
 .nav-item {
   display: flex; align-items: center; gap: var(--space-2);
-  padding: 7px var(--space-4) 7px 20px;
+  padding: 7px var(--space-4) 7px var(--space-4);  /* ← match dd-header left padding */
   cursor: pointer;
   font-size: 12px; font-weight: 500;
   color: var(--text-tertiary);

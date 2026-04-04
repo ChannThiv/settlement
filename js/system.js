@@ -65,10 +65,13 @@ let _sidebarOpen = true;
 
 function toggleSidebar() {
   _sidebarOpen = !_sidebarOpen;
-  document.getElementById('sidebar').classList.toggle('collapsed', !_sidebarOpen);
-  const btn = document.getElementById('sidebar-toggle');
-  btn.textContent  = _sidebarOpen ? '◀' : '▶';
-  btn.style.left   = _sidebarOpen ? '232px' : '0px';
+  const sidebar = document.getElementById('sidebar');
+  const btn     = document.getElementById('sidebar-toggle');
+  sidebar.classList.toggle('collapsed', !_sidebarOpen);
+  btn.textContent = _sidebarOpen ? '◀' : '▶';
+  btn.style.left  = _sidebarOpen
+    ? 'calc(var(--sidebar-w, 220px) - 8px)'
+    : '0px';
 }
 
 function toggleDD(id) {

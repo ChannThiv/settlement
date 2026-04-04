@@ -38,25 +38,21 @@
   </div>
 </header>
 
-<div id="layout">
+<!-- Sidebar toggle — outside layout so it doesn't affect flex flow -->
+<button id="sidebar-toggle" onclick="toggleSidebar()">◀</button>
 
-  <!-- Sidebar toggle -->
-  <button id="sidebar-toggle" onclick="toggleSidebar()">◀</button>
+<div id="layout">
 
   <!-- ── Sidebar ─────────────────────────────────────────────── -->
   <aside id="sidebar" class="sidebar">
 
     <nav class="sb-nav">
-      <div class="nav-section">Main</div>
       <div class="nav-item" style="--item-color:var(--cyan)" onclick="openTab('dashboard','Dashboard','◈','var(--cyan)')">
         <div class="nav-item-icon" style="background:var(--cyan-a12);color:var(--cyan)">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
         </div>
         Dashboard
       </div>
-
-      <div class="nav-divider"></div>
-      <div class="nav-section">Settlement</div>
 
       <div class="dd" id="dd-settle">
         <div class="dd-header" onclick="toggleDD('dd-settle')">
@@ -81,10 +77,6 @@
           </div>
         </div>
       </div>
-
-      <div class="nav-divider"></div>
-      <div class="nav-section">User Management</div>
-
       <div class="dd" id="dd-users">
         <div class="dd-header" onclick="toggleDD('dd-users')">
           <div class="dd-icon" style="background:var(--gold-a12);color:var(--gold)">
@@ -116,9 +108,7 @@
         </div>
       </div>
 
-      <div class="nav-divider"></div>
-      <div class="nav-section">Admin</div>
-
+  
       <div class="dd" id="dd-admin">
         <div class="dd-header" onclick="toggleDD('dd-admin')">
           <div class="dd-icon" style="background:var(--purple-a12);color:var(--purple)">
