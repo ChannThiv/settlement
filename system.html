@@ -4,6 +4,17 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Chann Thiv Settlement — System</title>
+  <!-- system.html <head> — add as first script -->
+<script>
+  (function() {
+    try {
+      var s = sessionStorage.getItem('ct_session_v2');
+      if (!s || !JSON.parse(s)) window.location.replace('login.html');
+    } catch(e) {
+      window.location.replace('login.html');
+    }
+  })();
+</script>
   <link rel="stylesheet" href="./css/tokens.css"/>
   <link rel="stylesheet" href="./css/base.css"/>
   <link rel="stylesheet" href="./css/components.css"/>

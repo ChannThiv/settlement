@@ -10,6 +10,9 @@
      state.activeIdx — index of currently visible tab
      state.search    — current search string
 ═══════════════════════════════════════════════════════════════════ */
+// js/app.js — add at the very top
+Auth.requireLogin();
+const SESSION = Auth.getSession();
 
 /* ── Application state ──────────────────────────────────────────── */
 const state = {
